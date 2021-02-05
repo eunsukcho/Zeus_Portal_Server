@@ -1,0 +1,11 @@
+app:
+          db_name:  "zeus_db"
+          db_port: "5431"
+          db_host: "192.168.0.118"
+          db_username: "jointree"
+          db_password: "jointree123"
+  
+   
+     
+       
+
