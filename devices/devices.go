@@ -3,7 +3,7 @@ package devices
 import (
 	"fmt"
 	"net/http"
-	"zeus/model"
+	model "zeus/initModel"
 
 	"github.com/gin-gonic/gin"
 )

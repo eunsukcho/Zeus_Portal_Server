@@ -2,6 +2,7 @@ package main
 
 import (
 	"zeus/devices"
+	"zeus/env"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,6 +30,8 @@ func main() {
 
 	r.GET("/get/project", devices.GetAllData)
 	r.GET("/get/project/:manufacturer", devices.GetOneManufacturerData)
+
+	r.GET("/api/systemInfo", env.GetAllEnvData)
 
 	r.Run("127.0.0.1:3000")
 }
