@@ -3,13 +3,12 @@ package smtpconnect
 import (
 	"net/http"
 	"net/smtp"
-	"zeus/smtpconnect"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Smtptest(c *gin.Context) {
-	var smtpinfo smtpconnect.SmtpInfo
+	var smtpinfo SmtpInfo
 	c.BindJSON(&smtpinfo)
 	auth := smtp.PlainAuth("", smtpinfo.AdminAddress, smtpinfo.Password, smtpinfo.SmtpAddress)
 	from := smtpinfo.AdminAddress

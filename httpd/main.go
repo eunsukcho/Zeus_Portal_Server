@@ -4,6 +4,7 @@ import (
 	"zeus/devices"
 	"zeus/env"
 	"zeus/smtpconnect"
+	"zeus/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,13 +28,25 @@ func CORSMiddelware() gin.HandlerFunc {
 
 func main() {
 	r := gin.Default()
-	//r.Use(CORSMiddelware())
 
 	r.GET("/get/project", devices.GetAllData)
 	r.GET("/get/project/:manufacturer", devices.GetOneManufacturerData)
 
-	r.GET("/api/systemInfo", env.GetAllEnvData)
+	envApi := r.Group("/api")
+	{
+		envApi.GET("/systemInfo", env.GetAllEnvData)
+		envApi.POST("/changeTheme", env.UpdateEnvData)
+	}
 
-	r.POST("/get/smtp", smtpconnect.Smtptest)
+	smtpApi := r.Group("/smpt")
+	{
+		smtpApi.POST("/register_smtp", smtpconnect.Smtptest)
+	}
+
+	userApi := r.Group("/user")
+	{
+		userApi.POST("/register_user", user.Register_user)
+	}
+
 	r.Run("127.0.0.1:3000")
 }
