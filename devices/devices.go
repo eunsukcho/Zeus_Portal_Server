@@ -1,7 +1,6 @@
 package devices
 
 import (
-	"fmt"
 	"net/http"
 	model "zeus/initModel"
 
@@ -10,8 +9,6 @@ import (
 
 func GetAllData(c *gin.Context) {
 	install_device_tbls := model.GetAll()
-
-	fmt.Println(c.Request.Header.Get("jsonType"))
 
 	c.JSON(http.StatusOK, install_device_tbls)
 }

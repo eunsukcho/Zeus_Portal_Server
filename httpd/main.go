@@ -5,6 +5,7 @@ import (
 	"zeus/env"
 	"zeus/menu"
 	"zeus/smtpconnect"
+	"zeus/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,12 +29,34 @@ func CORSMiddelware() gin.HandlerFunc {
 
 func main() {
 	r := gin.Default()
-	r.Use(CORSMiddelware())
 
 	r.GET("/get/project", devices.GetAllData)
 	r.GET("/get/project/:manufacturer", devices.GetOneManufacturerData)
 
-	r.GET("/api/systemInfo", env.GetAllEnvData)
+	envApi := r.Group("/api")
+	{
+		envApi.GET("/systemInfo", env.GetAllEnvData)
+		envApi.POST("/changeTheme", env.UpdateEnvData)
+	}
+
+	smtpApi := r.Group("/smpt")
+	{
+		smtpApi.POST("/register_smtp", smtpconnect.Smtptest)
+		smtpApi.POST("/smtpsave", smtpconnect.SmtpSave)
+	}
+
+	userApi := r.Group("/user")
+	{
+		userApi.POST("/register_user", user.Register_user)
+	}
+
+	/* menuApi := r.Group("/menu")
+	{
+		menuApi.GET("/topmenu", menu.GetTopMenuData)
+		menuApi.GET("/submenu", menu.SubTopMenuData)
+		menuApi.POST("/topmenusave", menu.SaveTopMenu)
+		menuApi.POST("/submenusave", menu.SaveSubMenu)
+	} */
 
 	r.GET("/get/topmenu", menu.GetTopMenuData)
 	r.GET("/get/submenu", menu.SubTopMenuData)
