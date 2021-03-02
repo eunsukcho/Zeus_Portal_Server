@@ -19,7 +19,6 @@ func (smtpinfo *SmtpInfo) SmtpConnectionCheck() error {
 	password := smtpinfo.Password
 	port, _ := strconv.Atoi(smtpinfo.Port)
 	d := gomail.NewDialer(smtpinfo.SmtpAddress, port, smtpinfo.AdminAddress, password)
-
 	_, err := d.Dial()
 	if err != nil {
 		return err

@@ -3,6 +3,7 @@ package main
 import (
 	"zeus/devices"
 	"zeus/env"
+	"zeus/menu"
 	"zeus/smtpconnect"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,13 @@ func main() {
 
 	r.GET("/api/systemInfo", env.GetAllEnvData)
 
+	r.GET("/get/topmenu", menu.GetTopMenuData)
+	r.GET("/get/submenu", menu.SubTopMenuData)
+	r.POST("/get/topmenusave", menu.SaveTopMenu)
+	r.POST("/get/submenusave", menu.SaveSubMenu)
+
 	r.POST("/get/smtp", smtpconnect.Smtptest)
 	r.POST("/get/smtpsave", smtpconnect.SmtpSave)
+
 	r.Run("127.0.0.1:3000")
 }
