@@ -2,12 +2,6 @@ package keycloak
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
 )
 
 type KeyCloak interface {
@@ -36,14 +30,15 @@ type response_Access_Token struct {
 }
 
 func InitAccessTokenInfo() *request_Access_Token {
-	rat := request_Access_Token{
+	/*rat := request_Access_Token{
 		"admin-cli",
 		"7eceed48-073d-4c47-bb30-aae22ac14366",
 		"http://192.168.0.118:9090/auth/realms/master/protocol/openid-connect/token",
 		"password",
 		"admin",
 		"admin",
-	}
+	}*/
+	rat := request_Access_Token{}
 	return &rat
 }
 
@@ -54,40 +49,6 @@ func InitResponseAccessTokenInfo() *response_Access_Token {
 
 func (rat request_Access_Token) Get_Header_AccessTokenInfo() request_Access_Token {
 	return rat
-}
-
-func (rat request_Access_Token) request_AccessToken(grantType string) string {
-	fmt.Println("AccessToken Request Info : ", rat)
-
-	data := url.Values{}
-	data.Set("client_id", rat.client_id)
-	data.Set("client_secret", rat.client_secret)
-	data.Set("grant_type", grantType)
-	data.Set("username", rat.username)
-	data.Set("password", rat.password)
-
-	req, err := http.NewRequest("POST", rat.access_token_url, strings.NewReader(data.Encode()))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{
-		Timeout: time.Second * 10,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
-		str := string(respBody)
-		return str
-	}
-	return ""
 }
 
 func (response response_Access_Token) parsing_Response_Expires_in(response_str string) int {
