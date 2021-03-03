@@ -18,7 +18,7 @@ type dbInfo struct {
 func settingDB() *dbInfo {
 	viper.SetConfigName("default")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/go_project/src/Zeus_Server/Zeus_Portal_Server")
+	viper.AddConfigPath("/home/ces/go/src/zeus")
 	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
