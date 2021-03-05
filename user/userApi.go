@@ -1,13 +1,26 @@
 package user
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"zeus/authInterface"
 
 	"github.com/gin-gonic/gin"
 )
 
+var ctx = context.Background()
+
 func Register_user(c *gin.Context) {
-	//keycloak.SetHeader(c)
-	bindUser := InitUserInfo()
-	fmt.Println("bindUser : ", bindUser)
+	var userInfo UserInfo
+
+	if err := c.ShouldBindJSON(&userInfo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(userInfo)
+
+	auth := authInterface.ClientAuthInterface.ClientInit()
+	auth.RequestApi(ctx)
+
 }
