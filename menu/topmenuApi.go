@@ -74,6 +74,44 @@ func SaveSubMenu(c *gin.Context) {
 
 }
 
+func DeleteTopMenu(c *gin.Context) {
+	var topmenuinfo TopMenuInfo
+	db := model.DbInit()
+	defer db.Close()
+	err := c.BindJSON(&topmenuinfo)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"error":  err,
+		})
+		return
+	}
+	db.Where("top_menu_code = ? ", topmenuinfo.Top_Menu_Code).Delete(&topmenuinfo)
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   topmenuinfo,
+	})
+}
+
+func DeleteSubMenu(c *gin.Context) {
+	var submenuinfo SubMenuInfo
+	db := model.DbInit()
+	defer db.Close()
+	err := c.BindJSON(&submenuinfo)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"error":  err,
+		})
+		return
+	}
+	db.Where("sub_menu_code = ? ", submenuinfo.Sub_Menu_Code).Delete(&submenuinfo)
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   submenuinfo,
+	})
+}
+
 func GetTopMenuData(c *gin.Context) {
 	topmenuinfo := GetTopMenu()
 	c.JSON(http.StatusOK, topmenuinfo)

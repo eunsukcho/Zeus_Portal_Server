@@ -29,7 +29,7 @@ func CORSMiddelware() gin.HandlerFunc {
 
 func main() {
 	r := gin.Default()
-
+	r.Use(CORSMiddelware())
 	r.GET("/get/project", devices.GetAllData)
 	r.GET("/get/project/:manufacturer", devices.GetOneManufacturerData)
 
@@ -39,7 +39,7 @@ func main() {
 		envApi.POST("/changeTheme", env.UpdateEnvData)
 	}
 
-	smtpApi := r.Group("/smpt")
+	smtpApi := r.Group("/smtp")
 	{
 		smtpApi.POST("/register_smtp", smtpconnect.Smtptest)
 		smtpApi.POST("/smtpsave", smtpconnect.SmtpSave)
@@ -50,21 +50,15 @@ func main() {
 		userApi.POST("/register_user", user.Register_user)
 	}
 
-	/* menuApi := r.Group("/menu")
+	menuApi := r.Group("/menu")
 	{
 		menuApi.GET("/topmenu", menu.GetTopMenuData)
 		menuApi.GET("/submenu", menu.SubTopMenuData)
 		menuApi.POST("/topmenusave", menu.SaveTopMenu)
 		menuApi.POST("/submenusave", menu.SaveSubMenu)
-	} */
-
-	r.GET("/get/topmenu", menu.GetTopMenuData)
-	r.GET("/get/submenu", menu.SubTopMenuData)
-	r.POST("/get/topmenusave", menu.SaveTopMenu)
-	r.POST("/get/submenusave", menu.SaveSubMenu)
-
-	r.POST("/get/smtp", smtpconnect.Smtptest)
-	r.POST("/get/smtpsave", smtpconnect.SmtpSave)
+		menuApi.POST("/topmenudelete", menu.DeleteTopMenu)
+		menuApi.POST("/submenudelete", menu.DeleteSubMenu)
+	}
 
 	r.Run("127.0.0.1:3000")
 }
