@@ -1,20 +1,21 @@
 package user
 
-type user struct {
-	Username   string        `binding:"required" json:"username, string"`
-	FirstName  string        `binding:"required" json:"firstName, string"`
-	Lastname   string        `binding:"required" json:"lastName, string"`
-	Email      string        `binding:"required" json:"email, string"`
+type UserInfo struct {
+	Username   string        `binding:"required" json:"username"`
+	FirstName  string        `binding:"required" json:"firstName"`
+	LastName   string        `binding:"required" json:"lastName"`
+	Enabled    string        `binding:"required" json:"enabled"`
+	Email      string        `binding:"required" json:"email"`
 	Attributes userAttribute `binding:"required" json:"attributes"`
 }
 
 type userAttribute struct {
-	DepartmentNm string `json:"departmentNm, string"`
-	Position     string `json:"position, string"`
-	PhoneNumber  string `json:"phoneNumber, string"`
+	DepartmentNm string `json:"departmentNm, string" binding:"required"`
+	Position     string `json:"position, string" binding:"required"`
+	PhoneNumber  string `json:"phoneNumber, string" binding:"required"`
 }
 
-func InitUserInfo() *user {
-	user := user{}
+func (user UserInfo) UserInit() *UserInfo {
+
 	return &user
 }

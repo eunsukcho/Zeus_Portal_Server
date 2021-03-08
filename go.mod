@@ -9,7 +9,8 @@ require (
 	github.com/lib/pq v1.9.0 // indirect
 	github.com/spf13/viper v1.7.1
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/oauth2 v0.0.0-20210216194517-16ff1888fd2e // indirect
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

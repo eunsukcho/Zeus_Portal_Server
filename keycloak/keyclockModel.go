@@ -2,12 +2,6 @@ package keycloak
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
 )
 
 type KeyCloak interface {
@@ -26,8 +20,8 @@ type request_Access_Token struct {
 
 type response_Access_Token struct {
 	Access_token       string `json:"access_token, string"`
-	Expires_in         string `json:"expires_in, string"`
-	Refresh_expires_in string `json:"refresh_expires_in, string"`
+	Expires_in         int    `json:"expires_in, int"`
+	Refresh_expires_in int    `json:"refresh_expires_in, int"`
 	Refresh_token      string `json:"refresh_token, string"`
 	Token_type         string `json:"token_type, string"`
 	Not_before_policy  int    `json:"not-before-policy, int"`
@@ -36,16 +30,18 @@ type response_Access_Token struct {
 }
 
 func InitAccessTokenInfo() *request_Access_Token {
-	rat := request_Access_Token{
+	/*rat := request_Access_Token{
 		"admin-cli",
-		"16a40d69-0846-4607-b4f5-04c5145e95ac",
-		"http://192.168.0.118:8080/auth/realms/master/protocol/openid-connect/token",
+		"7eceed48-073d-4c47-bb30-aae22ac14366",
+		"http://192.168.0.118:9090/auth/realms/master/protocol/openid-connect/token",
 		"password",
 		"admin",
 		"admin",
-	}
+	}*/
+	rat := request_Access_Token{}
 	return &rat
 }
+
 func InitResponseAccessTokenInfo() *response_Access_Token {
 	rat := response_Access_Token{}
 	return &rat
@@ -55,42 +51,26 @@ func (rat request_Access_Token) Get_Header_AccessTokenInfo() request_Access_Toke
 	return rat
 }
 
-func (rat request_Access_Token) request_AccessToken() string {
-	fmt.Println("AccessToken Request Info : ", rat)
+func (response response_Access_Token) parsing_Response_Expires_in(response_str string) int {
+	json.Unmarshal([]byte(response_str), &response)
 
-	data := url.Values{}
-	data.Set("client_id", rat.client_id)
-	data.Set("client_secret", rat.client_secret)
-	data.Set("grant_type", rat.grant_type)
-	data.Set("username", rat.username)
-	data.Set("password", rat.password)
-
-	req, err := http.NewRequest("POST", rat.access_token_url, strings.NewReader(data.Encode()))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{
-		Timeout: time.Second * 10,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
-		str := string(respBody)
-		return str
-	}
-	return ""
+	return response.Expires_in
 }
 
-func (response response_Access_Token) parsing_ResponseBodyJson(response_str string) string {
+func (response response_Access_Token) parsing_Response_RefreshExpires_in(response_str string) int {
+	json.Unmarshal([]byte(response_str), &response)
+
+	return response.Refresh_expires_in
+}
+
+func (response response_Access_Token) parsing_Response_AccessToken(response_str string) string {
 	json.Unmarshal([]byte(response_str), &response)
 
 	return response.Access_token
+}
+
+func (response response_Access_Token) parsing_Response_RefreshToken(response_str string) string {
+	json.Unmarshal([]byte(response_str), &response)
+
+	return response.Refresh_token
 }
