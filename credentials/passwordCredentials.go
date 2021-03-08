@@ -9,15 +9,22 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"zeus/authUserInterface"
 
 	"golang.org/x/oauth2"
 )
 
 var OAuthConf *oauth2.Config
 
+type UserInfo struct {
+	Username  string `binding:"required" json:"username"`
+	FirstName string `binding:"required" json:"firstName"`
+	LastName  string `binding:"required" json:"lastName"`
+	Enabled   string `binding:"required" json:"enabled"`
+	Email     string `binding:"required" json:"email"`
+}
+
 type Authdetails struct {
-	ClientInfo   authInterface.ClientInfoInterface
+	//ClientInfo   authInterface.ClientInfoInterface
 	APIClient    string
 	APISecret    string
 	UserName     string
@@ -52,7 +59,7 @@ func (auth *Authdetails) RequestApi(ctx context.Context) error {
 	log.Printf("[DEBUG] Fetching API Client")
 	log.Printf("[DEBUG] Client : ", client)
 
-	user := authUserInterface.ClientInfoInterface.UserInit()
+	user := UserInfo{}
 	fmt.Println("addUser :", user)
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)

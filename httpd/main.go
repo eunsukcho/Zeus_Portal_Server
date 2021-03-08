@@ -48,11 +48,11 @@ func main() {
 		userApi.POST("/register_user", user.Register_user)
 	}
 
-	testApi := r.Group("/test")
+	/*testApi := r.Group("/test")
 	{
 		testApi.POST("/post", user.SetCookieFunc)
 		testApi.GET("/get", user.GetCookieFunc)
-	}
+	}*/
 
 	r.Run("127.0.0.1:3000")
 }

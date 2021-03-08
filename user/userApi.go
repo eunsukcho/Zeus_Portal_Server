@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"zeus/authInterface"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +19,7 @@ func Register_user(c *gin.Context) {
 	}
 	fmt.Println(userInfo)
 
-	auth := authInterface.ClientAuthInterface.ClientInit()
-	auth.RequestApi(ctx)
+	//auth := authInterface.ClientAuthInterface.ClientInit()
+	//auth.RequestApi(ctx)
 
 }
