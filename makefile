@@ -1,3 +1,3 @@
 dev:
-	go run httpd/main.go
+	go run main/main.go
 
