@@ -14,6 +14,8 @@ import (
 
 type HandlerInterface interface {
 	GetEnvData(c *gin.Context)
+	UpdateEnvData(c *gin.Context)
+
 	Smtptest(c *gin.Context)
 	SmtpSave(c *gin.Context)
 
@@ -63,6 +65,32 @@ func (h *Handler) GetEnvData(c *gin.Context) {
 	}
 	fmt.Printf("Found %d products\n", len(env_setting_tbls))
 	c.JSON(http.StatusOK, env_setting_tbls)
+}
+func (h *Handler) UpdateEnvData(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var env models.Envs
+	err := c.BindJSON(&env)
+
+	rst, err := h.db.UpdateEnvData(env)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 }
 
 //smtp setting

@@ -31,9 +31,14 @@ func (db *DBORM) GetAllEnvData() (envs []models.Env_setting_Tbls, err error) {
 
 	return envs, db.Find(&envs).Error
 }
-func (db *DBORM) UpdateEnvData() ([]models.Env_setting_Tbls, error) {
+func (db *DBORM) UpdateEnvData(envs models.Envs) (envInfo models.Env_setting_Tbls, err error) {
 
-	return nil, nil
+	theme := envs.ThemeSettingVal
+	lang := envs.LangSettingVal
+	autoLogout := envs.AutoLogoutVal
+	version := envs.PortalVersion
+
+	return envInfo, db.Model(&envInfo).Updates(models.Env_setting_Tbls{ThemeSettingVal: theme, LangSettingVal: lang, AutoLogoutVal: autoLogout, PortalVersion: version}).Error
 }
 
 // menu setting

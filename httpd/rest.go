@@ -18,7 +18,7 @@ func RunAPIWithHandler(address string, h HandlerInterface) error {
 	envApi := r.Group("/api")
 	{
 		envApi.GET("/systemInfo", h.GetEnvData)
-		//envApi.POST("/changeTheme", env.UpdateEnvData)
+		envApi.POST("/changeTheme", h.UpdateEnvData)
 	}
 	smtpApi := r.Group("/smtp")
 	{

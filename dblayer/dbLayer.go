@@ -5,7 +5,7 @@ import "zeus/models"
 type DBLayer interface {
 	// init zeus env
 	GetAllEnvData() ([]models.Env_setting_Tbls, error)
-	UpdateEnvData() ([]models.Env_setting_Tbls, error)
+	UpdateEnvData(models.Envs) (models.Env_setting_Tbls, error)
 
 	// menu setting
 	GetAllTopMenu() ([]models.TopMenuInfo, error)

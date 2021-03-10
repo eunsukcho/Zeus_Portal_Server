@@ -80,6 +80,12 @@ type Env_setting_Tbls struct {
 	AutoLogoutVal   string `gorm:"column:auto_logout_val" binding:"required" json:autoLogoutVal`
 	PortalVersion   int    `gorm:"column:portal_version" binding:"required" json:portalVersion`
 }
+type Envs struct {
+	ThemeSettingVal string `binding:"required" json:themeSettingVal`
+	LangSettingVal  string `binding:"required" json:langSettingVal`
+	AutoLogoutVal   string `binding:"required" json:autoLogoutVal`
+	PortalVersion   int    `binding:"required" json:portalVersion`
+}
 
 func (Env_setting_Tbls) TableName() string {
 	return "env_setting_tbls"
