@@ -15,6 +15,16 @@ func (SmtpInfo) TableName() string {
 	return "smtp_setting_tbl"
 }
 
+func GetSmtpInfo() *[]SmtpInfo {
+	var smtpinfo []SmtpInfo
+
+	db := model.DbInit()
+	defer db.Close()
+	db.Find(&smtpinfo)
+
+	return &smtpinfo
+}
+
 func (smtpinfo *SmtpInfo) SmtpConnectionCheck() error {
 	password := smtpinfo.Password
 	port, _ := strconv.Atoi(smtpinfo.Port)
@@ -32,6 +42,7 @@ func SmtpSave(c *gin.Context) {
 	password, _ := bcrypt.GenerateFromPassword([]byte(smtpinfo.Password), bcrypt.DefaultCost)
 	defer db.Close()
 	err := c.BindJSON(&smtpinfo)
+	smtpinfo.Password = string(password)
 	err = smtpinfo.SmtpConnectionCheck()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -41,8 +52,7 @@ func SmtpSave(c *gin.Context) {
 		})
 		return
 	}
-	db.Create(&smtpinfo)
-	db.Model(&smtpinfo).Where("smtp_password = ?", smtpinfo.Password).Update("smtp_password", password)
+	db.Model(&smtpinfo).Update(&smtpinfo)
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
 		"isOK":   1,
@@ -67,4 +77,9 @@ func Smtptest(c *gin.Context) {
 		"isOK":   1,
 		"data":   smtpinfo,
 	})
+}
+
+func GetSmtpInfoData(c *gin.Context) {
+	smtpinfo := GetSmtpInfo()
+	c.JSON(http.StatusOK, smtpinfo)
 }

@@ -2,6 +2,7 @@ package menu
 
 import (
 	"net/http"
+	"time"
 	model "zeus/initModel"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,10 @@ func (TopMenuInfo) TableName() string {
 
 func (SubMenuInfo) TableName() string {
 	return "sub_menu_tbl"
+}
+
+func (TopMenuIcon) TableName() string {
+	return "top_menu_icon_tbl"
 }
 
 func GetTopMenu() *[]TopMenuInfo {
@@ -40,6 +45,8 @@ func SaveTopMenu(c *gin.Context) {
 	db := model.DbInit()
 	defer db.Close()
 	err := c.BindJSON(&topmenuinfo)
+	topmenuinfo.Created_Dt = time.Now()
+	topmenuinfo.Updated_Dt = time.Now()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -59,6 +66,8 @@ func SaveSubMenu(c *gin.Context) {
 	db := model.DbInit()
 	defer db.Close()
 	err := c.BindJSON(&submenuinfo)
+	submenuinfo.Created_Dt = time.Now()
+	submenuinfo.Updated_Dt = time.Now()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -112,6 +121,15 @@ func DeleteSubMenu(c *gin.Context) {
 	})
 }
 
+func GetTopMenuIcon() *[]TopMenuIcon {
+	var topmenuicon []TopMenuIcon
+	db := model.DbInit()
+	defer db.Close()
+	db.Find(&topmenuicon)
+
+	return &topmenuicon
+}
+
 func GetTopMenuData(c *gin.Context) {
 	topmenuinfo := GetTopMenu()
 	c.JSON(http.StatusOK, topmenuinfo)
@@ -120,4 +138,9 @@ func GetTopMenuData(c *gin.Context) {
 func SubTopMenuData(c *gin.Context) {
 	submenuinfo := GetSubMenu()
 	c.JSON(http.StatusOK, submenuinfo)
+}
+
+func GetTopMenuIconData(c *gin.Context) {
+	topmenuicon := GetTopMenuIcon()
+	c.JSON(http.StatusOK, topmenuicon)
 }

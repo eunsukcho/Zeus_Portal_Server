@@ -41,6 +41,7 @@ func main() {
 
 	smtpApi := r.Group("/smtp")
 	{
+		smtpApi.GET("/smtpget", smtpconnect.GetSmtpInfoData)
 		smtpApi.POST("/register_smtp", smtpconnect.Smtptest)
 		smtpApi.POST("/smtpsave", smtpconnect.SmtpSave)
 	}
@@ -54,6 +55,7 @@ func main() {
 	{
 		menuApi.GET("/topmenu", menu.GetTopMenuData)
 		menuApi.GET("/submenu", menu.SubTopMenuData)
+		menuApi.GET("/topmenuicon", menu.GetTopMenuIconData)
 		menuApi.POST("/topmenusave", menu.SaveTopMenu)
 		menuApi.POST("/submenusave", menu.SaveSubMenu)
 		menuApi.POST("/topmenudelete", menu.DeleteTopMenu)
