@@ -1,13 +1,6 @@
 package user
 
-import (
-	"context"
-	"fmt"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
+/*
 var ctx = context.Background()
 
 func Register_user(c *gin.Context) {
@@ -23,3 +16,4 @@ func Register_user(c *gin.Context) {
 	//auth.RequestApi(ctx)
 
 }
+*/

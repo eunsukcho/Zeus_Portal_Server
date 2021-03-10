@@ -1,5 +1,6 @@
 package user
 
+/*
 type UserInfo struct {
 	Username   string        `binding:"required" json:"username"`
 	FirstName  string        `binding:"required" json:"firstName"`
@@ -19,3 +20,4 @@ func (user UserInfo) UserInit() *UserInfo {
 
 	return &user
 }
+*/
