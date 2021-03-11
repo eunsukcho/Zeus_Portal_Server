@@ -1,40 +1,8 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
-
-type Install_Device_Tbls struct {
-	//gorm.Model
-	Manufacturer        string    `gorm:"column:manufacturer" json:manufacturer`
-	DeviceCode          string    `gorm:"column:device_code" json:deviceCode`
-	ProductSerialNumber string    `gorm:"column:product_serial_number" json:productSerialNumber`
-	TunnelNumber        int       `gorm:"column:tunnel_number" json:tunnelNumber`
-	TunnelName          string    `gorm:"column:tunnel_name" json:tunnelName`
-	ModelStatus         int       `gorm:"column:model_status" json:modelStatus`
-	InstallDt           time.Time `gorm:"column:install_dt" json:installDt`
-}
-
-func (Install_Device_Tbls) TableName() string {
-	return "install_device_tbls"
-}
-
-type UserInfo struct {
-	Username   string        `binding:"required" json:"username"`
-	FirstName  string        `binding:"required" json:"firstName"`
-	LastName   string        `binding:"required" json:"lastName"`
-	Enabled    string        `binding:"required" json:"enabled"`
-	Email      string        `binding:"required" json:"email"`
-	Attributes userAttribute `binding:"required" json:"attributes"`
-}
-
-type userAttribute struct {
-	DepartmentNm string `json:"departmentNm, string" binding:"required"`
-	Position     string `json:"position, string" binding:"required"`
-	PhoneNumber  string `json:"phoneNumber, string" binding:"required"`
-}
 
 type SmtpInfo struct {
 	gorm.Model
@@ -54,7 +22,6 @@ type TopMenuInfo struct {
 	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name" binding:"required`
 	Top_Menu_Target_Url string `gorm:"column:top_menu_target_url" json:"top_menu_target_url" binding:"required`
 	Top_Menu_Order      string `gorm:"column:top_menu_order" json:"top_menu_order" binding:"required`
-	Icon_Code           string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
 }
 
 func (TopMenuInfo) TableName() string {
@@ -69,20 +36,10 @@ type SubMenuInfo struct {
 	Sub_Menu_Name       string `gorm:"column:sub_menu_name" json:"sub_menu_name" binding:"required`
 	Sub_Menu_Target_Url string `gorm:"column:sub_menu_target_url" json:"sub_menu_target_url" binding:"required`
 	Sub_Menu_Order      string `gorm:"column:sub_menu_order" json:"sub_menu_order" binding:"required`
-	Icon_Code           string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
 }
 
 func (SubMenuInfo) TableName() string {
 	return "sub_menu_tbl_test"
-}
-
-type TopMenuIcon struct {
-	Icon_Code string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
-	Icon_Name string `gorm:"column:icon_name" json:"icon_name" binding:"required"`
-}
-
-func (TopMenuIcon) TableName() string {
-	return "top_menu_icon_tbl"
 }
 
 type Env_setting_Tbls struct {
