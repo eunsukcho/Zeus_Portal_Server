@@ -6,13 +6,14 @@ import (
 
 func RunAPI(address string) error {
 	h, err := NewHandler()
+	rh, err := NewRequestHandler()
 	if err != nil {
 		return err
 	}
-	return RunAPIWithHandler(address, h)
+	return RunAPIWithHandler(address, h, rh)
 }
 
-func RunAPIWithHandler(address string, h HandlerInterface) error {
+func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInterface) error {
 	r := gin.Default()
 
 	envApi := r.Group("/api")
@@ -37,6 +38,10 @@ func RunAPIWithHandler(address string, h HandlerInterface) error {
 		menuApi.POST("/submenudelete", h.DeleteSubMenu)
 		menuApi.POST("/topmenusaveUrl", h.SaveUrlLink)
 		menuApi.POST("/submenusaveUrl", h.SaveUrlSubLink)
+	}
+	userApi := r.Group("/user")
+	{
+		userApi.POST("/register_user", rh.RegisterUser)
 	}
 
 	/*

@@ -6,36 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type Install_Device_Tbls struct {
-	//gorm.Model
-	Manufacturer        string    `gorm:"column:manufacturer" json:manufacturer`
-	DeviceCode          string    `gorm:"column:device_code" json:deviceCode`
-	ProductSerialNumber string    `gorm:"column:product_serial_number" json:productSerialNumber`
-	TunnelNumber        int       `gorm:"column:tunnel_number" json:tunnelNumber`
-	TunnelName          string    `gorm:"column:tunnel_name" json:tunnelName`
-	ModelStatus         int       `gorm:"column:model_status" json:modelStatus`
-	InstallDt           time.Time `gorm:"column:install_dt" json:installDt`
-}
-
-func (Install_Device_Tbls) TableName() string {
-	return "install_device_tbls"
-}
-
-type UserInfo struct {
-	Username   string        `binding:"required" json:"username"`
-	FirstName  string        `binding:"required" json:"firstName"`
-	LastName   string        `binding:"required" json:"lastName"`
-	Enabled    string        `binding:"required" json:"enabled"`
-	Email      string        `binding:"required" json:"email"`
-	Attributes userAttribute `binding:"required" json:"attributes"`
-}
-
-type userAttribute struct {
-	DepartmentNm string `json:"departmentNm, string" binding:"required"`
-	Position     string `json:"position, string" binding:"required"`
-	PhoneNumber  string `json:"phoneNumber, string" binding:"required"`
-}
-
 type SmtpInfo struct {
 	gorm.Model
 	AdminAddress string `gorm:"column:smtp_user" json:"AdminAddress" binding:"required"`

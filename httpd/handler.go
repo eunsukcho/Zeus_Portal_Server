@@ -13,13 +13,16 @@ import (
 )
 
 type HandlerInterface interface {
+	//env setting
 	GetEnvData(c *gin.Context)
 	UpdateEnvData(c *gin.Context)
 
+	//smtp setting
 	Smtptest(c *gin.Context)
 	SmtpSave(c *gin.Context)
 	SmtpGet(c *gin.Context)
 
+	//menu setting
 	GetTopMenuData(c *gin.Context)
 	SubTopMenuData(c *gin.Context)
 	SaveTopMenu(c *gin.Context)
@@ -36,9 +39,9 @@ type Handler struct {
 }
 
 func NewHandler() (HandlerInterface, error) {
+	fmt.Println("Handler")
 	return NewHandlerWithParams()
 }
-
 func NewHandlerWithParams() (HandlerInterface, error) {
 	db, err := dblayer.NewDBInit()
 	if err != nil {
@@ -47,10 +50,6 @@ func NewHandlerWithParams() (HandlerInterface, error) {
 	return &Handler{
 		db: db,
 	}, nil
-}
-
-func NewHandlerWithDB(db dblayer.DBLayer) HandlerInterface {
-	return &Handler{db: db}
 }
 
 // init zeus env

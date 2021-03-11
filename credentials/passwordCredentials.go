@@ -1,18 +1,6 @@
 package credentials
 
-import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"time"
-
-	"golang.org/x/oauth2"
-)
-
+/*
 var OAuthConf *oauth2.Config
 
 type UserInfo struct {
@@ -103,3 +91,4 @@ func (auth *Authdetails) GetClient(ctx context.Context) (*http.Client, error) {
 	client := OAuthConf.Client(ctx, token)
 	return client, nil
 }
+*/
