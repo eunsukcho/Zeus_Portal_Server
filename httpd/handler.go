@@ -18,6 +18,7 @@ type HandlerInterface interface {
 
 	Smtptest(c *gin.Context)
 	SmtpSave(c *gin.Context)
+	SmtpGet(c *gin.Context)
 
 	GetTopMenuData(c *gin.Context)
 	SubTopMenuData(c *gin.Context)
@@ -25,6 +26,9 @@ type HandlerInterface interface {
 	SaveSubMenu(c *gin.Context)
 	DeleteTopMenu(c *gin.Context)
 	DeleteSubMenu(c *gin.Context)
+	GetIcon(c *gin.Context)
+	SaveUrlLink(c *gin.Context)
+	SaveUrlSubLink(c *gin.Context)
 }
 
 type Handler struct {
@@ -138,6 +142,8 @@ func (h *Handler) SmtpSave(c *gin.Context) {
 
 	err := c.BindJSON(&smtpinfo)
 	err = SmtpConnectionCheck(&smtpinfo)
+	smtpinfo.Password = string(password)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -146,7 +152,7 @@ func (h *Handler) SmtpSave(c *gin.Context) {
 		})
 		return
 	}
-	smtp, err := h.db.SmtpInfoSave(smtpinfo, password)
+	smtp, err := h.db.SmtpInfoSave(smtpinfo)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -159,6 +165,24 @@ func (h *Handler) SmtpSave(c *gin.Context) {
 	})
 }
 
+func (h *Handler) SmtpGet(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+
+	smtpinfo, err := h.db.SmtpInfoGet()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, smtpinfo)
+}
+
+//menu setting
 func (h *Handler) GetTopMenuData(c *gin.Context) {
 	if h.db == nil {
 		c.JSON(http.StatusInternalServerError,
@@ -306,4 +330,84 @@ func (h *Handler) DeleteSubMenu(c *gin.Context) {
 		"isOK":   1,
 		"data":   rst,
 	})
+}
+func (h *Handler) GetIcon(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	icon, err := h.db.GetAllIcon()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, icon)
+}
+
+func (h *Handler) SaveUrlLink(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var topMenu models.TopMenuInfo
+	err := c.ShouldBindJSON(&topMenu)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	rst, err := h.db.SaveUrlLink(topMenu)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
+
+}
+func (h *Handler) SaveUrlSubLink(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var subMenu models.SubMenuInfo
+	err := c.ShouldBindJSON(&subMenu)
+	fmt.Println(subMenu.New_Window)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	rst, err := h.db.SaveUrlSubLink(subMenu)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
+
 }

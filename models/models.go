@@ -49,12 +49,16 @@ func (SmtpInfo) TableName() string {
 }
 
 type TopMenuInfo struct {
-	gorm.Model
-	Top_Menu_Code       string `gorm:"column:top_menu_code" json:"top_menu_code" binding:"required`
-	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name" binding:"required`
-	Top_Menu_Target_Url string `gorm:"column:top_menu_target_url" json:"top_menu_target_url" binding:"required`
-	Top_Menu_Order      string `gorm:"column:top_menu_order" json:"top_menu_order" binding:"required`
-	Icon_Code           string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
+	Top_Menu_Code       string `gorm:"column:top_menu_code" json:"top_menu_code" binding:"required"`
+	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name"`
+	Top_Menu_Target_Url string `gorm:"column:top_menu_target_url" json:"top_menu_target_url"`
+	Top_Menu_Order      string `gorm:"column:top_menu_order" json:"top_menu_order"`
+	Icon_Code           string `gorm:"column:icon_code" json:"icon_code"`
+	ID                  uint   `gorm:"primarykey"`
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	DeletedAt           gorm.DeletedAt `gorm:"-"`
+	New_Window          bool           `gorm:"column:new_window" json:"new_window"`
 }
 
 func (TopMenuInfo) TableName() string {
@@ -63,13 +67,14 @@ func (TopMenuInfo) TableName() string {
 
 type SubMenuInfo struct {
 	gorm.Model
-	Top_Menu_Code       string `gorm:"column:top_menu_code;ForeignKey:top_menu_code" json:"top_menu_code" binding:"required`
+	Top_Menu_Code       string `gorm:"column:top_menu_code;ForeignKey:top_menu_code" json:"top_menu_code"`
 	Sub_Menu_Code       string `gorm:"column:sub_menu_code" json:"sub_menu_code" binding:"required`
-	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name" binding:"required`
-	Sub_Menu_Name       string `gorm:"column:sub_menu_name" json:"sub_menu_name" binding:"required`
-	Sub_Menu_Target_Url string `gorm:"column:sub_menu_target_url" json:"sub_menu_target_url" binding:"required`
-	Sub_Menu_Order      string `gorm:"column:sub_menu_order" json:"sub_menu_order" binding:"required`
-	Icon_Code           string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
+	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name"`
+	Sub_Menu_Name       string `gorm:"column:sub_menu_name" json:"sub_menu_name"`
+	Sub_Menu_Target_Url string `gorm:"column:sub_menu_target_url" json:"sub_menu_target_url"`
+	Sub_Menu_Order      string `gorm:"column:sub_menu_order" json:"sub_menu_order"`
+	Icon_Code           string `gorm:"column:icon_code" json:"icon_code"`
+	New_Window          bool   `gorm:"column:new_window" json:"new_window"`
 }
 
 func (SubMenuInfo) TableName() string {
@@ -77,8 +82,9 @@ func (SubMenuInfo) TableName() string {
 }
 
 type TopMenuIcon struct {
-	Icon_Code string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
-	Icon_Name string `gorm:"column:icon_name" json:"icon_name" binding:"required"`
+	Icon_Code        string `gorm:"column:icon_code" json:"icon_code" binding:"required"`
+	Icon_Name        string `gorm:"column:icon_name" json:"icon_name" binding:"required"`
+	Icon_Description string `gorm:"column:icon_description" json:"icon_description" binding:"required"`
 }
 
 func (TopMenuIcon) TableName() string {
