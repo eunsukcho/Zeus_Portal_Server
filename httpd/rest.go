@@ -37,6 +37,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	}
 	userApi := r.Group("/user")
 	{
+		userApi.POST("/user_list", rh.UserList)
 		userApi.POST("/register_user", rh.RegisterUser)
 	}
 

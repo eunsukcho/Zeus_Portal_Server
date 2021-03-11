@@ -2,7 +2,7 @@ package models
 
 import "golang.org/x/oauth2"
 
-type UserInfo struct {
+type RegisterUserInfo struct {
 	Username   string        `binding:"required" json:"username"`
 	FirstName  string        `binding:"required" json:"firstName"`
 	LastName   string        `binding:"required" json:"lastName"`
@@ -11,10 +11,15 @@ type UserInfo struct {
 	Attributes userAttribute `binding:"required" json:"attributes"`
 }
 
+type ResponseUserInfo struct {
+	RegisterUserInfo
+	CreatedTimestamp int `json:"CreatedTimestamp"`
+}
+
 type userAttribute struct {
-	DepartmentNm string `json:"departmentNm, string" binding:"required"`
-	Position     string `json:"position, string" binding:"required"`
-	PhoneNumber  string `json:"phoneNumber, string" binding:"required"`
+	DepartmentNm string `json:"departmentNm" binding:"required"`
+	Position     string `json:"position" binding:"required"`
+	PhoneNumber  string `json:"phoneNumber" binding:"required"`
 }
 
 type Authdetails struct {
