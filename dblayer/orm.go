@@ -55,20 +55,31 @@ func (db *DBORM) SaveSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, er
 	return sub, db.Create(&sub).Error
 }
 func (db *DBORM) DeleteTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error) {
-	return top, db.Where("top_menu_code = ? ", top.Top_Menu_Code).Delete(&top).Error
+	return top, db.Where("top_menu_code = ? ", top.Top_Menu_Code).Unscoped().Delete(&top).Error
 }
 func (db *DBORM) DeleteSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
-	return sub, db.Where("sub_menu_code = ? ", sub.Sub_Menu_Code).Delete(&sub).Error
+	return sub, db.Where("sub_menu_code = ? ", sub.Sub_Menu_Code).Unscoped().Delete(&sub).Error
+}
+func (db *DBORM) GetAllIcon() (icon []models.TopMenuIcon, err error) {
+	return icon, db.Find(&icon).Error
+}
+func (db *DBORM) SaveUrlLink(top models.TopMenuInfo) (models.TopMenuInfo, error) {
+	return top, db.Model(&top).Where("top_menu_code = ?", top.Top_Menu_Code).Update(models.TopMenuInfo{Top_Menu_Target_Url: top.Top_Menu_Target_Url, New_Window: top.New_Window}).Error
+}
+func (db *DBORM) SaveUrlSubLink(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
+	return sub, db.Model(&sub).Where("sub_menu_code = ?", sub.Sub_Menu_Code).Update(models.SubMenuInfo{Sub_Menu_Target_Url: sub.Sub_Menu_Target_Url, New_Window: sub.New_Window}).Error
 }
 
 //smtp setting
 func (db *DBORM) SmtpInfoConnectionCheck() ([]models.SmtpInfo, error) {
 	return nil, nil
 }
-func (db *DBORM) SmtpInfoSave(smtp models.SmtpInfo, password []byte) (models.SmtpInfo, error) {
-	db.Create(&smtp)
-	return smtp, db.Model(&smtp).Where("smtp_password = ?", smtp.Password).Update("smtp_password", password).Error
+func (db *DBORM) SmtpInfoSave(smtpinfo models.SmtpInfo) (models.SmtpInfo, error) {
+	return smtpinfo, db.Model(&smtpinfo).Update(&smtpinfo).Error
 }
 func (db *DBORM) SmtpInfoTest() ([]models.SmtpInfo, error) {
 	return nil, nil
+}
+func (db *DBORM) SmtpInfoGet() (smtpinfo []models.SmtpInfo, err error) {
+	return smtpinfo, db.Find(&smtpinfo).Error
 }

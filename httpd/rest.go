@@ -25,15 +25,19 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	{
 		smtpApi.POST("/register_smtp", h.Smtptest)
 		smtpApi.POST("/smtpsave", h.SmtpSave)
+		smtpApi.GET("/smtpget", h.SmtpGet)
 	}
 	menuApi := r.Group("/menu")
 	{
 		menuApi.GET("/topmenu", h.GetTopMenuData)
 		menuApi.GET("/submenu", h.SubTopMenuData)
+		menuApi.GET("/topmenuicon", h.GetIcon)
 		menuApi.POST("/topmenusave", h.SaveTopMenu)
 		menuApi.POST("/submenusave", h.SaveSubMenu)
 		menuApi.POST("/topmenudelete", h.DeleteTopMenu)
 		menuApi.POST("/submenudelete", h.DeleteSubMenu)
+		menuApi.POST("/topmenusaveUrl", h.SaveUrlLink)
+		menuApi.POST("/submenusaveUrl", h.SaveUrlSubLink)
 	}
 	userApi := r.Group("/user")
 	{

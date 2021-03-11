@@ -14,9 +14,13 @@ type DBLayer interface {
 	SaveSubMenuInfo(models.SubMenuInfo) (models.SubMenuInfo, error)
 	DeleteTopMenuInfo(models.TopMenuInfo) (models.TopMenuInfo, error)
 	DeleteSubMenuInfo(models.SubMenuInfo) (models.SubMenuInfo, error)
+	GetAllIcon() ([]models.TopMenuIcon, error)
+	SaveUrlLink(models.TopMenuInfo) (models.TopMenuInfo, error)
+	SaveUrlSubLink(models.SubMenuInfo) (models.SubMenuInfo, error)
 
 	//smtp setting
 	SmtpInfoConnectionCheck() ([]models.SmtpInfo, error)
-	SmtpInfoSave(models.SmtpInfo, []byte) (models.SmtpInfo, error)
+	SmtpInfoSave(models.SmtpInfo) (models.SmtpInfo, error)
 	SmtpInfoTest() ([]models.SmtpInfo, error)
+	SmtpInfoGet() ([]models.SmtpInfo, error)
 }
