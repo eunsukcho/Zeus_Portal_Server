@@ -18,6 +18,13 @@ func (SmtpInfo) TableName() string {
 	return "smtp_setting_tbl"
 }
 
+/*
+type MenuCode struct {
+	Top_Menu_Code       string `json:"top_menu_code" binding:"required"`
+	Sub_Menu_Code       string `json:"sub_menu_code" binding:"required"`
+	Sub_Menu_Target_Url string `json:"sub_menu_target_url"`
+}
+*/
 type TopMenuInfo struct {
 	Top_Menu_Code       string `gorm:"column:top_menu_code" json:"top_menu_code" binding:"required"`
 	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name"`

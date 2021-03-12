@@ -38,6 +38,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		menuApi.POST("/submenudelete", h.DeleteSubMenu)
 		menuApi.POST("/topmenusaveUrl", h.SaveUrlLink)
 		menuApi.POST("/submenusaveUrl", h.SaveUrlSubLink)
+		menuApi.POST("/target", h.GetMenuTargetUrl)
 	}
 	userApi := r.Group("/user")
 	{
