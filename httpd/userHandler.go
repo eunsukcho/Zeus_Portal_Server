@@ -47,11 +47,13 @@ func (h *RequestHandler) UserList(c *gin.Context) {
 	for _, value := range userinfo {
 		fmt.Println(value)
 	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   userinfo,
+	})
 }
 
 func (h *RequestHandler) RegisterUser(c *gin.Context) {
-
-	fmt.Println("userinfo : asfdf")
 
 	var userInfo models.RegisterUserInfo
 	if err := c.ShouldBindJSON(&userInfo); err != nil {
@@ -60,11 +62,15 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	fmt.Println("userinfo : ", userInfo)
 
-	err := h.requestH.RequestRegisterUserApi(h.ctx, userInfo, h.client)
+	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, userInfo, h.client)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusBadRequest, "error": err.Error()})
 		return
 	}
-
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   rst,
+	})
 }

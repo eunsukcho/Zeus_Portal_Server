@@ -86,10 +86,11 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 
 }
 
-func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) error {
+func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - RegisterUserApi")
 
+	fmt.Println(user)
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)
 
@@ -104,9 +105,10 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
-		str := string(respBody)
-		fmt.Println("str : " + str)
+	if err != nil {
+		return "", err
 	}
-	return nil
+	str := string(respBody)
+	fmt.Println("str : " + str)
+	return str, nil
 }
