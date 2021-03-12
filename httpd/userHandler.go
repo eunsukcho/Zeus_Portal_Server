@@ -12,6 +12,7 @@ import (
 
 type RequestHandlerInterface interface {
 	//user setting
+	UserList(c *gin.Context)
 	RegisterUser(c *gin.Context)
 }
 
@@ -36,37 +37,40 @@ func NewRequestHandler() (RequestHandlerInterface, error) {
 	}, nil
 }
 
-func (h *RequestHandler) RegisterUser(c *gin.Context) {
-	var userInfo models.UserInfo
-	if err := c.ShouldBindJSON(&userInfo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	/*
-		ctx := h.ctx
-		var client = h.requestH.GetClient(ctx)
-		var err error
+func (h *RequestHandler) UserList(c *gin.Context) {
 
-			if v := h.ctx.Value(oauth2.HTTPClient); v == nil {
-				fmt.Println("ㄴㄴ")
-				client, err = h.requestH.GetClient(ctx)
-				if err != nil {
-					panic(err)
-				}
-			}
-
-
-		client, err = h.requestH.GetClient(ctx)
-		client2, err2 := h.requestH.GetClient(ctx)
-
-		if err2 != nil {
-			fmt.Println(client2)
-		}
-	*/
-	err := h.requestH.RequestRegisterUserApi(h.ctx, userInfo, h.client)
+	userinfo, err := h.requestH.RequestUserListApi(h.ctx, h.client)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	for _, value := range userinfo {
+		fmt.Println(value)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   userinfo,
+	})
+}
 
+func (h *RequestHandler) RegisterUser(c *gin.Context) {
+
+	var userInfo models.RegisterUserInfo
+	if err := c.ShouldBindJSON(&userInfo); err != nil {
+		fmt.Println(err)
+
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println("userinfo : ", userInfo)
+
+	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, userInfo, h.client)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusBadRequest, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   rst,
+	})
 }

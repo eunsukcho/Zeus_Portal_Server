@@ -38,7 +38,7 @@ func (TopMenuInfo) TableName() string {
 type SubMenuInfo struct {
 	gorm.Model
 	Top_Menu_Code       string `gorm:"column:top_menu_code;ForeignKey:top_menu_code" json:"top_menu_code"`
-	Sub_Menu_Code       string `gorm:"column:sub_menu_code" json:"sub_menu_code" binding:"required`
+	Sub_Menu_Code       string `gorm:"column:sub_menu_code" json:"sub_menu_code" binding:"required"`
 	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name"`
 	Sub_Menu_Name       string `gorm:"column:sub_menu_name" json:"sub_menu_name"`
 	Sub_Menu_Target_Url string `gorm:"column:sub_menu_target_url" json:"sub_menu_target_url"`

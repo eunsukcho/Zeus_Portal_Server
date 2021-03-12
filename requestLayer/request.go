@@ -65,11 +65,32 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 	return token
 }
 
-func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.UserInfo, client *http.Client) error {
+func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Client) ([]models.ResponseUserInfo, error) {
+	log.Printf("[DEBUG] Fetching API Client - UserListApi")
+	resp, err := client.Get(
+		"http://192.168.0.118:9090/auth/admin/realms/parthenon/users",
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 
-	log.Printf("[DEBUG] Fetching API Client")
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err == nil {
+		userinfo := &[]models.ResponseUserInfo{}
+		_ = json.Unmarshal([]byte(string(respBody)), userinfo)
 
-	fmt.Println("addUser :", user)
+		return *userinfo, nil
+	}
+	return nil, nil
+
+}
+
+func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
+
+	log.Printf("[DEBUG] Fetching API Client - RegisterUserApi")
+
+	fmt.Println(user)
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)
 
@@ -84,9 +105,10 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Us
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
-		str := string(respBody)
-		fmt.Println("str : " + str)
+	if err != nil {
+		return "", err
 	}
-	return nil
+	str := string(respBody)
+	fmt.Println("str : " + str)
+	return str, nil
 }

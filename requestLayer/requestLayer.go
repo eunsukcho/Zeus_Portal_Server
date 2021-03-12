@@ -11,5 +11,6 @@ import (
 type RequestLayer interface {
 	//GetClient(context.Context) (*http.Client, error)
 	GetApiClientTokenSource(context.Context) *oauth2.Token
-	RequestRegisterUserApi(context.Context, models.UserInfo, *http.Client) error
+	RequestUserListApi(context.Context, *http.Client) ([]models.ResponseUserInfo, error)
+	RequestRegisterUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, error)
 }

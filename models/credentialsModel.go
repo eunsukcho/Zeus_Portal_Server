@@ -11,10 +11,26 @@ type UserInfo struct {
 	Attributes userAttribute `binding:"required" json:"attributes"`
 }
 
+type RegisterUserInfo struct {
+	UserInfo
+	Credential []userCredentilas `binding:"required" json:"credentials"`
+}
+
+type ResponseUserInfo struct {
+	UserInfo
+	CreatedTimestamp int `json:"CreatedTimestamp"`
+}
+
 type userAttribute struct {
-	DepartmentNm string `json:"departmentNm, string" binding:"required"`
-	Position     string `json:"position, string" binding:"required"`
-	PhoneNumber  string `json:"phoneNumber, string" binding:"required"`
+	DepartmentNm string `json:"departmentNm" binding:"required"`
+	Position     string `json:"position" binding:"required"`
+	PhoneNumber  string `json:"phoneNumber" binding:"required"`
+}
+
+type userCredentilas struct {
+	Type      string `json:"type" binding:"required"`
+	Value     string `json:"value" binding:"required"`
+	Temporary bool   `json:"temporary" binding:"required"`
 }
 
 type Authdetails struct {
