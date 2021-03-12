@@ -28,7 +28,7 @@ type TopMenuInfo struct {
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	DeletedAt           gorm.DeletedAt `gorm:"-"`
-	New_Window          bool           `gorm:"column:new_window" json:"new_window"`
+	New_Window          string         `gorm:"column:new_window" json:"new_window"`
 }
 
 func (TopMenuInfo) TableName() string {
@@ -44,7 +44,7 @@ type SubMenuInfo struct {
 	Sub_Menu_Target_Url string `gorm:"column:sub_menu_target_url" json:"sub_menu_target_url"`
 	Sub_Menu_Order      string `gorm:"column:sub_menu_order" json:"sub_menu_order"`
 	Icon_Code           string `gorm:"column:icon_code" json:"icon_code"`
-	New_Window          bool   `gorm:"column:new_window" json:"new_window"`
+	New_Window          string `gorm:"column:new_window" json:"new_window"`
 }
 
 func (SubMenuInfo) TableName() string {

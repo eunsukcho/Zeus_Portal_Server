@@ -365,7 +365,7 @@ func (h *Handler) SaveUrlLink(c *gin.Context) {
 		return
 	}
 	rst, err := h.db.SaveUrlLink(topMenu)
-
+	fmt.Println(rst)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		fmt.Println(err)
@@ -386,7 +386,6 @@ func (h *Handler) SaveUrlSubLink(c *gin.Context) {
 	}
 	var subMenu models.SubMenuInfo
 	err := c.ShouldBindJSON(&subMenu)
-	fmt.Println(subMenu.New_Window)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -397,7 +396,7 @@ func (h *Handler) SaveUrlSubLink(c *gin.Context) {
 		return
 	}
 	rst, err := h.db.SaveUrlSubLink(subMenu)
-
+	fmt.Println(rst)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		fmt.Println(err)
