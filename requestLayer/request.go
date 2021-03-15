@@ -25,10 +25,10 @@ func NewAuthInfo() (*AuthInfo, error) {
 	return &AuthInfo{
 		&models.Authdetails{
 			APIClient: "admin-cli",
-			APISecret: "7eceed48-073d-4c47-bb30-aae22ac14366",
+			APISecret: "81371db6-02d5-4ac8-b413-31c307e4c7c6",
 			UserName:  "admin",
-			Password:  "admin",
-			APIURL:    "http://192.168.0.118:9090/auth/realms/master/protocol/openid-connect/token",
+			Password:  "Jointree!123",
+			APIURL:    "https://docker.jointree.co.kr:8443/auth/realms/master/protocol/openid-connect/token",
 		}}, nil
 }
 
@@ -68,7 +68,7 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Client) ([]models.ResponseUserInfo, error) {
 	log.Printf("[DEBUG] Fetching API Client - UserListApi")
 	resp, err := client.Get(
-		"http://192.168.0.118:9090/auth/admin/realms/parthenon/users",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -95,7 +95,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	buff := bytes.NewBuffer(ubytes)
 
 	resp, err := client.Post(
-		"http://192.168.0.118:9090/auth/admin/realms/parthenon/users",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
 		"application/json",
 		buff,
 	)
