@@ -1,6 +1,21 @@
 package models
 
-import "golang.org/x/oauth2"
+type AdminAPIInfo struct {
+	User RegisterUserInfo `binding:"required" json:"user"`
+	Admin Authdetails `binding:"required" json:"admin"`
+}
+
+type RegisterUserInfo struct {
+	UserInfo
+	Attributes userAttribute `binding:"required" json:"attributes"`
+	Credential []userCredentilas `binding:"required" json:"credentials"`
+}
+
+type ResponseUserInfo struct {
+	UserInfo
+	Attributes resUserAttributes `binding:"required" json:"attributes"`
+	CreatedTimestamp int `json:"CreatedTimestamp"`
+}
 
 type UserInfo struct {
 	Username   string        `binding:"required" json:"username"`
@@ -8,23 +23,18 @@ type UserInfo struct {
 	LastName   string        `binding:"required" json:"lastName"`
 	Enabled    string        `binding:"required" json:"enabled"`
 	Email      string        `binding:"required" json:"email"`
-	Attributes userAttribute `binding:"required" json:"attributes"`
-}
-
-type RegisterUserInfo struct {
-	UserInfo
-	Credential []userCredentilas `binding:"required" json:"credentials"`
-}
-
-type ResponseUserInfo struct {
-	UserInfo
-	CreatedTimestamp int `json:"CreatedTimestamp"`
+	ClientRoles string 		 `binding:"required" json:"clientRoles"`
 }
 
 type userAttribute struct {
 	DepartmentNm string `json:"departmentNm" binding:"required"`
 	Position     string `json:"position" binding:"required"`
 	PhoneNumber  string `json:"phoneNumber" binding:"required"`
+}
+type resUserAttributes struct {
+	DepartmentNm []string `json:"departmentNm" binding:"required"`
+	Position     []string `json:"position" binding:"required"`
+	PhoneNumber  []string `json:"phoneNumber" binding:"required"`
 }
 
 type userCredentilas struct {
@@ -34,13 +44,9 @@ type userCredentilas struct {
 }
 
 type Authdetails struct {
-	APIClient    string
-	APISecret    string
-	UserName     string
-	Password     string
-	Account      string
-	APIURL       string
-	OrbitURL     string
-	CurrentToken oauth2.TokenSource
-	Transport    oauth2.Transport
+	ClientId    string `json:"clientId" binding:"required"`
+	ClientSecret    string `json:"clientSecret" binding:"required"`
+	AdminId     string `json:"adminId" binding:"required"`
+	AdminPw     string `json:"adminPw" binding:"required"`
+	TokenUrl       string `json:"tokenUrl" binding:"required"`
 }

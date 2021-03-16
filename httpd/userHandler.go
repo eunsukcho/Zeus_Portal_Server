@@ -14,6 +14,7 @@ type RequestHandlerInterface interface {
 	//user setting
 	UserList(c *gin.Context)
 	RegisterUser(c *gin.Context)
+	UserClientInit(c *gin.Context)
 }
 
 type RequestHandler struct {
@@ -23,26 +24,44 @@ type RequestHandler struct {
 }
 
 func NewRequestHandler() (RequestHandlerInterface, error) {
-	ctx := context.Background()
-	auth, err := requestLayer.NewAuthInfo()
-	apiClient, err := requestLayer.GetClient(ctx, auth)
+	var authBinding models.Authdetails
+	auth, err := requestLayer.NewAuthInfo(authBinding)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("new request handler")
 	return &RequestHandler{
 		requestH: auth,
-		ctx:      ctx,
-		client:   apiClient,
+		ctx : context.Background(),
 	}, nil
 }
 
-func (h *RequestHandler) UserList(c *gin.Context) {
-
-	userinfo, err := h.requestH.RequestUserListApi(h.ctx, h.client)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+func (h *RequestHandler) UserClientInit(c *gin.Context) {
+	var authBinding models.Authdetails
+	if err := c.ShouldBindJSON(&authBinding); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	fmt.Println("authBinding List : " , authBinding)
+	auth, _ := requestLayer.NewAuthInfo(authBinding)
+	apiClient, _ := requestLayer.GetClient(h.ctx, auth)
+	
+	h.client = apiClient
+}
+
+func (h *RequestHandler) UserList(c *gin.Context) {
+	if h.client == nil {
+		fmt.Println("h.client is nill")
+		h.UserClientInit(c)
+	}
+
+	var userinfo []models.ResponseUserInfo
+	var err error
+
+	userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
+	if err != nil {
+		fmt.Println("requestList error 발생")
+		h.UserClientInit(c)
+		userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
 	}
 	for _, value := range userinfo {
 		fmt.Println(value)
@@ -54,20 +73,24 @@ func (h *RequestHandler) UserList(c *gin.Context) {
 }
 
 func (h *RequestHandler) RegisterUser(c *gin.Context) {
+	if h.client == nil {
+		fmt.Println("h.client is nill")
+		h.UserClientInit(c)
+	}
 
-	var userInfo models.RegisterUserInfo
-	if err := c.ShouldBindJSON(&userInfo); err != nil {
+	var regi models.AdminAPIInfo
+	if err := c.ShouldBindJSON(&regi); err != nil {
 		fmt.Println(err)
 
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println("userinfo : ", userInfo)
+	fmt.Println("userinfo : ", regi)
 
-	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, userInfo, h.client)
+	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, regi.User, h.client)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusBadRequest, "error": err.Error()})
-		return
+		fmt.Println("request register error 발생")
+		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 	"zeus/models"
+	"errors"
 
 	"golang.org/x/oauth2"
 )
@@ -19,21 +20,18 @@ var OAuthConf *oauth2.Config
 type AuthInfo struct {
 	*models.Authdetails
 }
+var errConnFail = errors.New("Connection Failed")
+var tokenErr = errors.New("Invalid Token")
 
-func NewAuthInfo() (*AuthInfo, error) {
-
+func NewAuthInfo(auth models.Authdetails) (*AuthInfo, error) {
 	return &AuthInfo{
-		&models.Authdetails{
-			APIClient: "admin-cli",
-			APISecret: "81371db6-02d5-4ac8-b413-31c307e4c7c6",
-			UserName:  "admin",
-			Password:  "Jointree!123",
-			APIURL:    "https://docker.jointree.co.kr:8443/auth/realms/master/protocol/openid-connect/token",
-		}}, nil
-}
-
-func DefaultClient() {
-	//client := oauth2.Transport
+		&models.Authdetails {
+			ClientId: auth.ClientId,
+			ClientSecret: auth.ClientSecret,
+			AdminId:  auth.AdminId,
+			AdminPw:  auth.AdminPw,
+			TokenUrl: auth.TokenUrl,
+	}}, nil
 }
 
 func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
@@ -48,20 +46,20 @@ func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
 
 func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token {
 	OAuthConf = &oauth2.Config{
-		ClientID:     auth.APIClient,
-		ClientSecret: auth.APISecret,
+		ClientID:     auth.ClientId,
+		ClientSecret: auth.ClientSecret,
 		Endpoint: oauth2.Endpoint{
-			TokenURL: auth.APIURL,
+			TokenURL: auth.TokenUrl,
 		},
 	}
 
-	log.Println("[DEBUG] Obtaining Tokensource for user %s", auth.UserName)
+	log.Println("[DEBUG] Obtaining Tokensource for user %s", auth.AdminId)
 
-	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.UserName, auth.Password)
+	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
 	if err != nil {
 		panic(err)
 	}
-	auth.CurrentToken = OAuthConf.TokenSource(ctx, token)
+	
 	return token
 }
 
@@ -71,18 +69,23 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Connection Error")
+		return nil, errConnFail
+	}
+	if resp.StatusCode != 200 {
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
+	if err == nil && resp.StatusCode == 200 {
 		userinfo := &[]models.ResponseUserInfo{}
 		_ = json.Unmarshal([]byte(string(respBody)), userinfo)
 
 		return *userinfo, nil
 	}
-	return nil, nil
+	
+	return nil, errConnFail
 
 }
 
@@ -91,6 +94,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	log.Printf("[DEBUG] Fetching API Client - RegisterUserApi")
 
 	fmt.Println(user)
+	//user.ClientRoles
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)
 
@@ -99,8 +103,12 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 		"application/json",
 		buff,
 	)
+	if resp.StatusCode != 200 {
+		return "", err
+	}
+
 	if err != nil {
-		log.Fatal(err)
+		return "", errConnFail
 	}
 	defer resp.Body.Close()
 
@@ -108,6 +116,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	if err != nil {
 		return "", err
 	}
+
 	str := string(respBody)
 	fmt.Println("str : " + str)
 	return str, nil

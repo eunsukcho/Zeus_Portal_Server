@@ -70,6 +70,7 @@ func (h *Handler) GetEnvData(c *gin.Context) {
 	fmt.Printf("Found %d products\n", len(env_setting_tbls))
 	c.JSON(http.StatusOK, env_setting_tbls)
 }
+
 func (h *Handler) UpdateEnvData(c *gin.Context) {
 	if h.db == nil {
 		c.JSON(http.StatusInternalServerError,
