@@ -32,7 +32,8 @@ type HandlerInterface interface {
 	GetIcon(c *gin.Context)
 	SaveUrlLink(c *gin.Context)
 	SaveUrlSubLink(c *gin.Context)
-	GetMenuTargetUrl(c *gin.Context)
+	DeleteTopMenuUrl(c *gin.Context)
+	DeleteSubMenuUrl(c *gin.Context)
 }
 
 type Handler struct {
@@ -367,7 +368,7 @@ func (h *Handler) SaveUrlLink(c *gin.Context) {
 		return
 	}
 	rst, err := h.db.SaveUrlLink(topMenu)
-
+	fmt.Println(rst)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		fmt.Println(err)
@@ -388,7 +389,6 @@ func (h *Handler) SaveUrlSubLink(c *gin.Context) {
 	}
 	var subMenu models.SubMenuInfo
 	err := c.ShouldBindJSON(&subMenu)
-	fmt.Println(subMenu.New_Window)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -399,7 +399,7 @@ func (h *Handler) SaveUrlSubLink(c *gin.Context) {
 		return
 	}
 	rst, err := h.db.SaveUrlSubLink(subMenu)
-
+	fmt.Println(rst)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		fmt.Println(err)
@@ -413,31 +413,63 @@ func (h *Handler) SaveUrlSubLink(c *gin.Context) {
 
 }
 
-func (h *Handler) GetMenuTargetUrl(c *gin.Context) {
-	var menuCode models.SubMenuInfo
-	err := c.ShouldBindJSON(&menuCode)
+func (h *Handler) DeleteTopMenuUrl(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var topMenu models.TopMenuInfo
+	err := c.BindJSON(&topMenu)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
 			"isOK":   0,
 			"error":  err,
 		})
-		fmt.Println(err)
 		return
 	}
-	fmt.Println("MenuCode :", menuCode)
 
-	rst, err := h.db.GetMenuTargetUrl(menuCode)
+	rst, err := h.db.DeleteTopMenuUrl(topMenu)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		fmt.Println(err)
 		return
 	}
-	fmt.Println("targetUrl : ", rst)
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
 		"isOK":   1,
-		"data":   rst.Sub_Menu_Target_Url,
+		"data":   rst,
 	})
+}
 
+func (h *Handler) DeleteSubMenuUrl(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var subMenu models.SubMenuInfo
+	err := c.BindJSON(&subMenu)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		return
+	}
+	rst, err := h.db.DeleteSubMenuUrl(subMenu)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
 }

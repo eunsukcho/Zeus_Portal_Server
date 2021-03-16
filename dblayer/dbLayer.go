@@ -17,7 +17,8 @@ type DBLayer interface {
 	GetAllIcon() ([]models.TopMenuIcon, error)
 	SaveUrlLink(models.TopMenuInfo) (models.TopMenuInfo, error)
 	SaveUrlSubLink(models.SubMenuInfo) (models.SubMenuInfo, error)
-	GetMenuTargetUrl(models.SubMenuInfo) (models.SubMenuInfo, error)
+	DeleteTopMenuUrl(models.TopMenuInfo) (models.TopMenuInfo, error)
+	DeleteSubMenuUrl(sub models.SubMenuInfo) (models.SubMenuInfo, error)
 
 	//smtp setting
 	SmtpInfoConnectionCheck() ([]models.SmtpInfo, error)

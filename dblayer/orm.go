@@ -69,8 +69,11 @@ func (db *DBORM) SaveUrlLink(top models.TopMenuInfo) (models.TopMenuInfo, error)
 func (db *DBORM) SaveUrlSubLink(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
 	return sub, db.Model(&sub).Where("sub_menu_code = ?", sub.Sub_Menu_Code).Update(models.SubMenuInfo{Sub_Menu_Target_Url: sub.Sub_Menu_Target_Url, New_Window: sub.New_Window}).Error
 }
-func (db *DBORM) GetMenuTargetUrl(menuCode models.SubMenuInfo) (urlCode models.SubMenuInfo, err error) {
-	return urlCode, db.Where("top_menu_code=? and sub_menu_code=?", menuCode.Top_Menu_Code, menuCode.Sub_Menu_Code).Find(&urlCode).Error
+func (db *DBORM) DeleteTopMenuUrl(top models.TopMenuInfo) (models.TopMenuInfo, error) {
+	return top, db.Model(&top).Where("top_menu_code = ?", top.Top_Menu_Code).Update(models.TopMenuInfo{Top_Menu_Target_Url: top.Top_Menu_Target_Url}).Error
+}
+func (db *DBORM) DeleteSubMenuUrl(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
+	return sub, db.Model(&sub).Where("sub_menu_code = ?", sub.Sub_Menu_Code).Update(models.SubMenuInfo{Sub_Menu_Target_Url: sub.Sub_Menu_Target_Url}).Error
 }
 
 //smtp setting
