@@ -11,7 +11,7 @@ import (
 	"time"
 	"zeus/models"
 	"errors"
-
+	_"strings"
 	"golang.org/x/oauth2"
 )
 
@@ -60,6 +60,7 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 		panic(err)
 	}
 	
+	auth.Token = token
 	return token
 }
 
@@ -104,6 +105,74 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 		buff,
 	)
 	if resp.StatusCode != 200 {
+		return "", err
+	}
+
+	if err != nil {
+		return "", errConnFail
+	}
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	str := string(respBody)
+	fmt.Println("str : " + str)
+	return str, nil
+}
+
+func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, client *http.Client) ([]models.ResGroupInfo, error) {
+	log.Printf("[DEBUG] Fetching API Client - UserGroupsApi")
+	//https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups?briefRepresentation=false
+	resp, err := client.Get(
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups?briefRepresentation=false",
+	)
+	if err != nil {
+		log.Println("Connection Error")
+		return nil, errConnFail
+	}
+	if resp.StatusCode != 200 {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err == nil && resp.StatusCode == 200 {
+		groups := &[]models.ResGroupInfo{}
+		_ = json.Unmarshal([]byte(string(respBody)), groups)
+
+		return *groups, nil
+	}
+	
+	return nil, errConnFail
+
+}
+
+func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models.ReqToken, client *http.Client) (string, error) {
+
+	log.Printf("[DEBUG] Fetching API Client - Register Groups Api")
+
+	fmt.Println("GROUP : ", group)
+	ubytes, _ := json.Marshal(group)
+	buff := bytes.NewBuffer(ubytes)
+
+	req, err := http.NewRequest(
+		"PUT",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups/"+group.Id,
+		buff,
+	)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	
+	if resp.StatusCode != 204 {
+		t, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("str : " + string(t))
+
 		return "", err
 	}
 

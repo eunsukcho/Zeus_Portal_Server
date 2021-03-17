@@ -15,6 +15,9 @@ type RequestHandlerInterface interface {
 	UserList(c *gin.Context)
 	RegisterUser(c *gin.Context)
 	UserClientInit(c *gin.Context)
+
+	GroupsList(c *gin.Context)
+	RegisterToken(c *gin.Context)
 }
 
 type RequestHandler struct {
@@ -90,6 +93,56 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, regi.User, h.client)
 	if err != nil {
 		fmt.Println("request register error 발생")
+		panic(err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   rst,
+	})
+}
+
+func (h *RequestHandler) GroupsList(c *gin.Context) {
+	if h.client == nil {
+		fmt.Println("h.client is nill")
+		h.UserClientInit(c)
+	}
+
+	var groups []models.ResGroupInfo
+	var err error
+
+	groups, err = h.requestH.RequestGroupListApi(h.ctx, h.client)
+	if err != nil {
+		fmt.Println("requestGroups error 발생")
+		h.UserClientInit(c)
+		groups, err = h.requestH.RequestGroupListApi(h.ctx, h.client)
+	}
+	for _, value := range groups {
+		fmt.Println(value)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   groups,
+	})
+}
+
+func (h *RequestHandler) RegisterToken(c *gin.Context) {
+	if h.client == nil {
+		fmt.Println("h.client is nill")
+		h.UserClientInit(c)
+	}
+
+	var regi models.ReqToken
+	if err := c.ShouldBindJSON(&regi); err != nil {
+		fmt.Println(err)
+
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println("ResGroupInfo : ", regi)
+
+	rst, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.client)
+	if err != nil {
+		fmt.Println("request register group add  error 발생")
 		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{

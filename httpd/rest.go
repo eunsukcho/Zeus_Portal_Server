@@ -21,13 +21,13 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		envApi.GET("/systemInfo", h.GetEnvData)
 		envApi.POST("/changeTheme", h.UpdateEnvData)
 	}
-	smtpApi := r.Group("/smtp")
+	smtpApi := r.Group("/api/smtp")
 	{
 		smtpApi.POST("/register_smtp", h.Smtptest)
 		smtpApi.POST("/smtpsave", h.SmtpSave)
 		smtpApi.GET("/smtpget", h.SmtpGet)
 	}
-	menuApi := r.Group("/menu")
+	menuApi := r.Group("/api/menu")
 	{
 		menuApi.GET("/topmenu", h.GetTopMenuData)
 		menuApi.GET("/submenu", h.SubTopMenuData)
@@ -41,28 +41,17 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		menuApi.POST("/topmenudeleteUrl", h.DeleteTopMenuUrl)
 		menuApi.POST("/submenudeleteUrl", h.DeleteSubMenuUrl)
 	}
-	userApi := r.Group("/user")
+	userApi := r.Group("/api/user")
 	{
 		userApi.POST("/infoInit", rh.UserClientInit)
 		userApi.POST("/user_list", rh.UserList)
 		userApi.POST("/register_user", rh.RegisterUser)
 	}
+	groupApi := r.Group("/api/groups")
+	{
+		groupApi.POST("/lt", rh.GroupsList)
+		groupApi.POST("/putKey", rh.RegisterToken)
+	}
 
-	/*
-		userApi := r.Group("/user")
-		{
-			userApi.POST("/register_user", user.Register_user)
-		}
-
-		menuApi := r.Group("/menu")
-		{
-			menuApi.GET("/topmenu", menu.GetTopMenuData)
-			menuApi.GET("/submenu", menu.SubTopMenuData)
-			menuApi.POST("/topmenusave", menu.SaveTopMenu)
-			menuApi.POST("/submenusave", menu.SaveSubMenu)
-			menuApi.POST("/topmenudelete", menu.DeleteTopMenu)
-			menuApi.POST("/submenudelete", menu.DeleteSubMenu)
-		}
-	*/
 	return r.Run(address)
 }

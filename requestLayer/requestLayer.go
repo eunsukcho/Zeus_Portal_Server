@@ -12,4 +12,7 @@ type RequestLayer interface {
 	GetApiClientTokenSource(context.Context) *oauth2.Token
 	RequestUserListApi(context.Context, *http.Client) ([]models.ResponseUserInfo, error)
 	RequestRegisterUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, error)
+
+	RequestGroupListApi(context.Context, *http.Client) ([]models.ResGroupInfo, error)
+	RequestRegisterGroupsApi(context.Context, models.ReqToken, *http.Client) (string, error)
 }

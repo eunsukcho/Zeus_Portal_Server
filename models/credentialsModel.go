@@ -1,12 +1,24 @@
 package models
 
+import "golang.org/x/oauth2"
+
 type AdminAPIInfo struct {
 	User RegisterUserInfo `binding:"required" json:"user"`
 	Admin Authdetails `binding:"required" json:"admin"`
 }
 
+type Authdetails struct {
+	ClientId    string `json:"clientId" binding:"required"`
+	ClientSecret    string `json:"clientSecret" binding:"required"`
+	AdminId     string `json:"adminId" binding:"required"`
+	AdminPw     string `json:"adminPw" binding:"required"`
+	TokenUrl       string `json:"tokenUrl" binding:"required"`
+	Token *oauth2.Token
+}
+
 type RegisterUserInfo struct {
 	UserInfo
+	Groups []string `binding:"required" json:"groups"`
 	Attributes userAttribute `binding:"required" json:"attributes"`
 	Credential []userCredentilas `binding:"required" json:"credentials"`
 }
@@ -23,7 +35,6 @@ type UserInfo struct {
 	LastName   string        `binding:"required" json:"lastName"`
 	Enabled    string        `binding:"required" json:"enabled"`
 	Email      string        `binding:"required" json:"email"`
-	ClientRoles string 		 `binding:"required" json:"clientRoles"`
 }
 
 type userAttribute struct {
@@ -43,10 +54,19 @@ type userCredentilas struct {
 	Temporary bool   `json:"temporary" binding:"required"`
 }
 
-type Authdetails struct {
-	ClientId    string `json:"clientId" binding:"required"`
-	ClientSecret    string `json:"clientSecret" binding:"required"`
-	AdminId     string `json:"adminId" binding:"required"`
-	AdminPw     string `json:"adminPw" binding:"required"`
-	TokenUrl       string `json:"tokenUrl" binding:"required"`
+type ReqToken struct {
+	Id string `json:"id" `
+	Attributes groupAttributes `json:"attributes" `
+}
+
+type ResGroupInfo struct {
+	Id string `json:"id" binding:"required"`
+	Name string `json:"name" binding:"required"`
+	Path string `json:"path" binding:"required"`
+	Attributes groupAttributes `json:"attributes" binding:"required"`
+}
+
+type groupAttributes struct {
+	Testval []string `json:"test" binding:"required"`
+	TokenVal []string `json:"token" binding:"required"`
 }
