@@ -75,6 +75,9 @@ func (db *DBORM) DeleteTopMenuUrl(top models.TopMenuInfo) (models.TopMenuInfo, e
 func (db *DBORM) DeleteSubMenuUrl(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
 	return sub, db.Model(&sub).Where("sub_menu_code = ?", sub.Sub_Menu_Code).Update(models.SubMenuInfo{Sub_Menu_Target_Url: sub.Sub_Menu_Target_Url}).Error
 }
+func (db *DBORM) GetMenuTargetUrl(menuCode models.SubMenuInfo) (urlCode models.SubMenuInfo, err error) {
+	return urlCode, db.Where("top_menu_code=? and sub_menu_code=?", menuCode.Top_Menu_Code, menuCode.Sub_Menu_Code).Find(&urlCode).Error
+}
 
 //smtp setting
 func (db *DBORM) SmtpInfoConnectionCheck() ([]models.SmtpInfo, error) {

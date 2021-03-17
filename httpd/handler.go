@@ -34,6 +34,7 @@ type HandlerInterface interface {
 	SaveUrlSubLink(c *gin.Context)
 	DeleteTopMenuUrl(c *gin.Context)
 	DeleteSubMenuUrl(c *gin.Context)
+	GetMenuTargetUrl(c *gin.Context)
 }
 
 type Handler struct {
@@ -472,4 +473,32 @@ func (h *Handler) DeleteSubMenuUrl(c *gin.Context) {
 		"isOK":   1,
 		"data":   rst,
 	})
+}
+func (h *Handler) GetMenuTargetUrl(c *gin.Context) {
+	var menuCode models.SubMenuInfo
+	err := c.ShouldBindJSON(&menuCode)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("MenuCode :", menuCode)
+
+	rst, err := h.db.GetMenuTargetUrl(menuCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("targetUrl : ", rst)
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst.Sub_Menu_Target_Url,
+	})
+
 }
