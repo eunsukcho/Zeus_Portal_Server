@@ -15,6 +15,7 @@ type RequestHandlerInterface interface {
 	UserList(c *gin.Context)
 	RegisterUser(c *gin.Context)
 	UserClientInit(c *gin.Context)
+	DeleteUser(c *gin.Context)
 
 	GroupsList(c *gin.Context)
 	RegisterToken(c *gin.Context)
@@ -62,7 +63,7 @@ func (h *RequestHandler) UserList(c *gin.Context) {
 
 	userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
 	if err != nil {
-		fmt.Println("requestList error 발생")
+		fmt.Println("RequestUserListApi error 발생")
 		h.UserClientInit(c)
 		userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
 	}
@@ -84,7 +85,6 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 	var regi models.AdminAPIInfo
 	if err := c.ShouldBindJSON(&regi); err != nil {
 		fmt.Println(err)
-
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -93,7 +93,27 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, regi.User, h.client)
 	if err != nil {
 		fmt.Println("request register error 발생")
-		panic(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   rst,
+	})
+}
+
+func (h *RequestHandler) DeleteUser(c *gin.Context) {
+	if h.client == nil {
+		fmt.Println("h.client is nill")
+		h.UserClientInit(c)
+	}
+	var userid string
+	rst, err := h.requestH.DeleteUserApi(h.ctx, userid, h.client)
+
+	if err != nil {
+		fmt.Println("request user delete error 발생")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
@@ -142,8 +162,9 @@ func (h *RequestHandler) RegisterToken(c *gin.Context) {
 
 	rst, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.client)
 	if err != nil {
-		fmt.Println("request register group add  error 발생")
-		panic(err)
+		fmt.Println("request register group add error 발생")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
