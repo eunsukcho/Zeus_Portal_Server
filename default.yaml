@@ -5,7 +5,10 @@ app:
           db_username: "postgres"
           db_password: "Jointree!123"
   
-   
+keycloak:
+  userEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users"
+  groupEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups"
+
      
        
 

@@ -1,7 +1,5 @@
 package models
 
-import "golang.org/x/oauth2"
-
 type AdminAPIInfo struct {
 	User RegisterUserInfo `binding:"required" json:"user"`
 	Admin Authdetails `binding:"required" json:"admin"`
@@ -13,7 +11,6 @@ type Authdetails struct {
 	AdminId     string `json:"adminId" binding:"required"`
 	AdminPw     string `json:"adminPw" binding:"required"`
 	TokenUrl       string `json:"tokenUrl" binding:"required"`
-	Token *oauth2.Token
 }
 
 type RegisterUserInfo struct {
@@ -24,6 +21,7 @@ type RegisterUserInfo struct {
 }
 
 type ResponseUserInfo struct {
+	Id		   		string		 `json:"id"`
 	UserInfo
 	Attributes resUserAttributes `binding:"required" json:"attributes"`
 	CreatedTimestamp int `json:"CreatedTimestamp"`
@@ -67,6 +65,5 @@ type ResGroupInfo struct {
 }
 
 type groupAttributes struct {
-	Testval []string `json:"test" binding:"required"`
-	TokenVal []string `json:"token" binding:"required"`
+	TokenVal []string `json:"token"`
 }

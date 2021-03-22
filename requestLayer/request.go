@@ -60,21 +60,17 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 		panic(err)
 	}
 	
-	auth.Token = token
 	return token
 }
 
 func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Client) ([]models.ResponseUserInfo, error) {
-	log.Printf("[DEBUG] Fetching API Client - UserListApi")
+	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
 	resp, err := client.Get(
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
 	)
-	if err != nil {
+	if err != nil || resp.StatusCode != 200 {
 		log.Println("Connection Error")
 		return nil, errConnFail
-	}
-	if resp.StatusCode != 200 {
-		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -92,10 +88,9 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 
 func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
 
-	log.Printf("[DEBUG] Fetching API Client - RegisterUserApi")
+	log.Printf("[DEBUG] Fetching API Client - Request Register User Api")
 
 	fmt.Println(user)
-	//user.ClientRoles
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)
 
@@ -104,36 +99,53 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 		"application/json",
 		buff,
 	)
-	if resp.StatusCode != 200 {
-		return "", err
-	}
-
-	if err != nil {
-		return "", errConnFail
+	fmt.Println(resp.StatusCode)
+	if err != nil || resp.StatusCode != 201 {
+		fmt.Println("register error")
+		fmt.Println(err)
 	}
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(respBody))
 	if err != nil {
 		return "", err
 	}
+	return string(respBody), nil
+}
 
-	str := string(respBody)
-	fmt.Println("str : " + str)
-	return str, nil
+func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *http.Client) (string, error) {
+	log.Printf("[DEBUG] Fetching API Client - Delete User Api")
+	
+	req, err := http.NewRequest(
+		"DELETE",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"+user,
+		nil,
+	)
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return "error", err
+	}
+	
+	resp, err := client.Do(req)
+	
+	if err != nil || resp.StatusCode != 204 {
+		t, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("str : " + string(t))
+
+		return "error", err
+	}
+
+	return "", nil
 }
 
 func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, client *http.Client) ([]models.ResGroupInfo, error) {
-	log.Printf("[DEBUG] Fetching API Client - UserGroupsApi")
-	//https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups?briefRepresentation=false
+	log.Printf("[DEBUG] Fetching API Client - User Groups Api")
 	resp, err := client.Get(
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups?briefRepresentation=false",
 	)
-	if err != nil {
+	if err != nil || resp.StatusCode != 200 {
 		log.Println("Connection Error")
-		return nil, errConnFail
-	}
-	if resp.StatusCode != 200 {
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -145,9 +157,7 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, client *http.Clie
 
 		return *groups, nil
 	}
-	
-	return nil, errConnFail
-
+	return nil, err
 }
 
 func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models.ReqToken, client *http.Client) (string, error) {
@@ -169,24 +179,13 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	
-	if resp.StatusCode != 204 {
+	if err != nil || resp.StatusCode != 204 {
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "", err
-	}
-
-	if err != nil {
-		return "", errConnFail
+		return "error", err
 	}
 	defer resp.Body.Close()
 
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	str := string(respBody)
-	fmt.Println("str : " + str)
-	return str, nil
+	return "", nil
 }
