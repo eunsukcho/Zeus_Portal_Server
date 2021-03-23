@@ -35,6 +35,9 @@ type HandlerInterface interface {
 	DeleteTopMenuUrl(c *gin.Context)
 	DeleteSubMenuUrl(c *gin.Context)
 	GetMenuTargetUrl(c *gin.Context)
+	GetTopMenuTargetUrl(c *gin.Context)
+	UpdateTopMenuInfo(c *gin.Context)
+	UpdateSubMenuInfo(c *gin.Context)
 }
 
 type Handler struct {
@@ -323,7 +326,6 @@ func (h *Handler) DeleteSubMenu(c *gin.Context) {
 		return
 	}
 	rst, err := h.db.DeleteSubMenuInfo(subMenu)
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -475,6 +477,11 @@ func (h *Handler) DeleteSubMenuUrl(c *gin.Context) {
 	})
 }
 func (h *Handler) GetMenuTargetUrl(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
 	var menuCode models.SubMenuInfo
 	err := c.ShouldBindJSON(&menuCode)
 	if err != nil {
@@ -501,4 +508,103 @@ func (h *Handler) GetMenuTargetUrl(c *gin.Context) {
 		"data":   rst.Sub_Menu_Target_Url,
 	})
 
+}
+func (h *Handler) GetTopMenuTargetUrl(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var menuCode models.TopMenuInfo
+	err := c.ShouldBindJSON(&menuCode)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("MenuCode :", menuCode)
+
+	rst, err := h.db.GetTopMenuTargetUrl(menuCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("targetUrl : ", rst)
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst.Top_Menu_Target_Url,
+	})
+
+}
+
+func (h *Handler) UpdateTopMenuInfo(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+
+	var topMenu models.TopMenuInfo
+	err := c.ShouldBindJSON(&topMenu)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	rst, err := h.db.UpdateTopMenuInfo(topMenu)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
+
+}
+
+func (h *Handler) UpdateSubMenuInfo(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+
+	var subMenu models.SubMenuInfo
+	err := c.ShouldBindJSON(&subMenu)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	rst, err := h.db.UpdateSubMenuInfo(subMenu)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
 }

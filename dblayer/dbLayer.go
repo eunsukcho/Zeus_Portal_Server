@@ -20,6 +20,9 @@ type DBLayer interface {
 	DeleteTopMenuUrl(models.TopMenuInfo) (models.TopMenuInfo, error)
 	DeleteSubMenuUrl(sub models.SubMenuInfo) (models.SubMenuInfo, error)
 	GetMenuTargetUrl(models.SubMenuInfo) (models.SubMenuInfo, error)
+	GetTopMenuTargetUrl(models.TopMenuInfo) (models.TopMenuInfo, error)
+	UpdateTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error)
+	UpdateSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error)
 
 	//smtp setting
 	SmtpInfoConnectionCheck() ([]models.SmtpInfo, error)

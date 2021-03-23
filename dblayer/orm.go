@@ -59,7 +59,7 @@ func (db *DBORM) DeleteTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, 
 	return top, db.Where("top_menu_code = ? ", top.Top_Menu_Code).Unscoped().Delete(&top).Error
 }
 func (db *DBORM) DeleteSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
-	return sub, db.Where("sub_menu_code = ? ", sub.Sub_Menu_Code).Unscoped().Delete(&sub).Error
+	return sub, db.Where("sub_menu_code = ? and top_menu_code=?", sub.Sub_Menu_Code, sub.Top_Menu_Code).Unscoped().Delete(&sub).Error
 }
 func (db *DBORM) GetAllIcon() (icon []models.TopMenuIcon, err error) {
 	return icon, db.Find(&icon).Error
@@ -78,6 +78,15 @@ func (db *DBORM) DeleteSubMenuUrl(sub models.SubMenuInfo) (models.SubMenuInfo, e
 }
 func (db *DBORM) GetMenuTargetUrl(menuCode models.SubMenuInfo) (urlCode models.SubMenuInfo, err error) {
 	return urlCode, db.Where("top_menu_code=? and sub_menu_code=?", menuCode.Top_Menu_Code, menuCode.Sub_Menu_Code).Find(&urlCode).Error
+}
+func (db *DBORM) GetTopMenuTargetUrl(menuCode models.TopMenuInfo) (urlCode models.TopMenuInfo, err error) {
+	return urlCode, db.Where("top_menu_code=?", menuCode.Top_Menu_Code).Find(&urlCode).Error
+}
+func (db *DBORM) UpdateTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error) {
+	return top, db.Model(&top).Where("top_menu_code=?", top.Top_Menu_Code).Update(models.TopMenuInfo{Top_Menu_Name: top.Top_Menu_Name, Top_Menu_Order: top.Top_Menu_Order, Icon_Code: top.Icon_Code}).Error
+}
+func (db *DBORM) UpdateSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
+	return sub, db.Model(&sub).Where("sub_menu_code=?", sub.Sub_Menu_Code).Update(models.SubMenuInfo{Sub_Menu_Name: sub.Sub_Menu_Name, Sub_Menu_Order: sub.Sub_Menu_Order, Top_Menu_Code: sub.Top_Menu_Code, Top_Menu_Name: sub.Top_Menu_Name, Icon_Code: sub.Icon_Code}).Error
 }
 
 //smtp setting
