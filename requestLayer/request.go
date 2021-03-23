@@ -66,11 +66,11 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Client) ([]models.ResponseUserInfo, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
 	resp, err := client.Get(
-		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/",
 	)
+	
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Connection Error")
-		return nil, errConnFail
 	}
 	defer resp.Body.Close()
 
@@ -86,6 +86,30 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 
 }
 
+func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client *http.Client) (models.ResponseUserInfo, error) {
+	log.Printf("[DEBUG] Fetching API Client - Request One User Api")
+
+	resp, err := client.Get(
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"+user,
+	)
+	
+	if err != nil || resp.StatusCode != 200 {
+		log.Println("Connection Error")
+	}
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err == nil && resp.StatusCode == 200 {
+		userinfo := &models.ResponseUserInfo{}
+		_ = json.Unmarshal([]byte(string(respBody)), userinfo)
+
+		return *userinfo, nil
+	}
+	
+	return models.ResponseUserInfo{}, errConnFail
+}
+
+
 func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - Request Register User Api")
@@ -96,6 +120,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 
 	resp, err := client.Post(
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
+		//"http://192.168.0.118:9090/auth/admin/realms/parthenon/users",
 		"application/json",
 		buff,
 	)
@@ -139,10 +164,46 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *ht
 	return "", nil
 }
 
+func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
+
+	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
+
+	fmt.Println(user)
+
+	ubytes, _ := json.Marshal(user)
+	buff := bytes.NewBuffer(ubytes)
+
+	req, err := http.NewRequest(
+		"PUT",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"+user.ID,
+		buff,
+	)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+
+	fmt.Println(resp.StatusCode)
+	if err != nil || resp.StatusCode != 204 {
+		fmt.Println("register error")
+		fmt.Println(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(respBody))
+	if err != nil {
+		return "", err
+	}
+	return string(respBody), nil
+}
+
 func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, client *http.Client) ([]models.ResGroupInfo, error) {
 	log.Printf("[DEBUG] Fetching API Client - User Groups Api")
 	resp, err := client.Get(
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups?briefRepresentation=false",
+		//"http://192.168.0.118:9090/auth/admin/realms/parthenon/groups?briefRepresentation=false",
 	)
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Connection Error")
@@ -171,6 +232,7 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 	req, err := http.NewRequest(
 		"PUT",
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups/"+group.Id,
+		//"http://192.168.0.118:9090/auth/admin/realms/parthenon/groups/"+group.Id,
 		buff,
 	)
 	if err != nil {

@@ -18,13 +18,6 @@ func (SmtpInfo) TableName() string {
 	return "smtp_setting_tbl"
 }
 
-/*
-type MenuCode struct {
-	Top_Menu_Code       string `json:"top_menu_code" binding:"required"`
-	Sub_Menu_Code       string `json:"sub_menu_code" binding:"required"`
-	Sub_Menu_Target_Url string `json:"sub_menu_target_url"`
-}
-*/
 type TopMenuInfo struct {
 	Top_Menu_Code       string `gorm:"column:top_menu_code" json:"top_menu_code" binding:"required"`
 	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name"`
@@ -73,12 +66,14 @@ type Env_setting_Tbls struct {
 	LangSettingVal  string `gorm:"column:lang_setting_val" binding:"required" json:"langSettingVal"`
 	AutoLogoutVal   string `gorm:"column:auto_logout_val" binding:"required" json:"autoLogoutVal"`
 	PortalVersion   int    `gorm:"column:portal_version" binding:"required" json:"portalVersion"`
+	UserRegisterAuth string `gorm:"column:user_register_auth" binding:"required" json:"userRegisterAuth"`
 }
 type Envs struct {
 	ThemeSettingVal string `binding:"required" json:"themeSettingVal"`
 	LangSettingVal  string `binding:"required" json:"langSettingVal"`
 	AutoLogoutVal   string `binding:"required" json:"autoLogoutVal"`
 	PortalVersion   int    `binding:"required" json:"zoneVersionportalVersion"`
+	UserRegisterAuth string `binding:"required" json:"userRegisterAuth"`
 }
 
 func (Env_setting_Tbls) TableName() string {

@@ -6,18 +6,28 @@ type AdminAPIInfo struct {
 }
 
 type Authdetails struct {
-	ClientId    string `json:"clientId" binding:"required"`
+	ClientId    	string `json:"clientId" binding:"required"`
 	ClientSecret    string `json:"clientSecret" binding:"required"`
-	AdminId     string `json:"adminId" binding:"required"`
-	AdminPw     string `json:"adminPw" binding:"required"`
-	TokenUrl       string `json:"tokenUrl" binding:"required"`
+	AdminId     	string `json:"adminId" binding:"required"`
+	AdminPw     	string `json:"adminPw" binding:"required"`
+	TokenUrl       	string `json:"tokenUrl" binding:"required"`
+}
+
+type UserListData struct {
+	Id	string `json:"id"`
+	Admin Authdetails `binding:"required" json:"admin"`
+}
+
+type Uri struct {
+	Id string `uri:"id" binding:"required"`
 }
 
 type RegisterUserInfo struct {
+	ID	string `json:"id"`
 	UserInfo
-	Groups []string `binding:"required" json:"groups"`
+	Groups []string `json:"groups"`
 	Attributes userAttribute `binding:"required" json:"attributes"`
-	Credential []userCredentilas `binding:"required" json:"credentials"`
+	Credential []userCredentilas `json:"credentials"`
 }
 
 type ResponseUserInfo struct {
@@ -31,7 +41,7 @@ type UserInfo struct {
 	Username   string        `binding:"required" json:"username"`
 	FirstName  string        `binding:"required" json:"firstName"`
 	LastName   string        `binding:"required" json:"lastName"`
-	Enabled    string        `binding:"required" json:"enabled"`
+	Enabled    string        `json:"enabled"`
 	Email      string        `binding:"required" json:"email"`
 }
 

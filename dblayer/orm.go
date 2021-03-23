@@ -37,8 +37,9 @@ func (db *DBORM) UpdateEnvData(envs models.Envs) (envInfo models.Env_setting_Tbl
 	lang := envs.LangSettingVal
 	autoLogout := envs.AutoLogoutVal
 	version := envs.PortalVersion
+	userAuth := envs.UserRegisterAuth
 
-	return envInfo, db.Model(&envInfo).Updates(models.Env_setting_Tbls{ThemeSettingVal: theme, LangSettingVal: lang, AutoLogoutVal: autoLogout, PortalVersion: version}).Error
+	return envInfo, db.Model(&envInfo).Updates(models.Env_setting_Tbls{ThemeSettingVal: theme, LangSettingVal: lang, AutoLogoutVal: autoLogout, PortalVersion: version, UserRegisterAuth: userAuth}).Error
 }
 
 // menu setting
