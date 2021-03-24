@@ -45,6 +45,11 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		menuApi.POST("/topmenuupdate", h.UpdateTopMenuInfo)
 		menuApi.POST("/submenuupdate", h.UpdateSubMenuInfo)
 	}
+	authApi := r.Group("/api/auth")
+	{
+		authApi.POST("/auth_list", h.AuthInfoData)
+		authApi.POST("/save_auth", h.SaveAuthData)
+	}
 	userApi := r.Group("/api/user")
 	{
 		userApi.POST("/infoInit", rh.UserClientInit)
@@ -52,6 +57,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		userApi.POST("/register_user", rh.RegisterUser)
 		userApi.POST("/delete_user/:id", rh.DeleteUser)
 		userApi.POST("/update_user", rh.UpdateUser)
+		userApi.POST("/update_userCredentials/:id", rh.UpdateUserCredentials)
 	}
 	groupApi := r.Group("/api/groups")
 	{

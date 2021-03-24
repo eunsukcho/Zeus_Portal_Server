@@ -5,7 +5,7 @@ import "zeus/models"
 type DBLayer interface {
 	// init zeus env
 	GetAllEnvData() ([]models.Env_setting_Tbls, error)
-	UpdateEnvData(models.Envs) (models.Env_setting_Tbls, error)
+	UpdateEnvData(models.Env_setting_Tbls) (models.Env_setting_Tbls, error)
 
 	// menu setting
 	GetAllTopMenu() ([]models.TopMenuInfo, error)
@@ -29,4 +29,8 @@ type DBLayer interface {
 	SmtpInfoSave(models.SmtpInfo) (models.SmtpInfo, error)
 	SmtpInfoTest() ([]models.SmtpInfo, error)
 	SmtpInfoGet() ([]models.SmtpInfo, error)
+
+	//auth setting
+	GetAllAuthData() ([]models.Authdetails, error)
+	SaveAuthData(models.Authdetails) ([]models.Authdetails, error)
 }

@@ -31,7 +31,7 @@ func (db *DBORM) GetAllEnvData() (envs []models.Env_setting_Tbls, err error) {
 
 	return envs, db.Find(&envs).Error
 }
-func (db *DBORM) UpdateEnvData(envs models.Envs) (envInfo models.Env_setting_Tbls, err error) {
+func (db *DBORM) UpdateEnvData(envs models.Env_setting_Tbls) (envInfo models.Env_setting_Tbls, err error) {
 
 	theme := envs.ThemeSettingVal
 	lang := envs.LangSettingVal
@@ -39,7 +39,7 @@ func (db *DBORM) UpdateEnvData(envs models.Envs) (envInfo models.Env_setting_Tbl
 	version := envs.PortalVersion
 	userAuth := envs.UserRegisterAuth
 
-	return envInfo, db.Model(&envInfo).Updates(models.Env_setting_Tbls{ThemeSettingVal: theme, LangSettingVal: lang, AutoLogoutVal: autoLogout, PortalVersion: version, UserRegisterAuth: userAuth}).Error
+	return envInfo, db.Model(&envInfo).Updates(map[string]interface{}{"ThemeSettingVal": theme, "LangSettingVal": lang, "AutoLogoutVal": autoLogout, "PortalVersion": version, "UserRegisterAuth": userAuth}).Error
 }
 
 // menu setting
@@ -101,4 +101,16 @@ func (db *DBORM) SmtpInfoTest() ([]models.SmtpInfo, error) {
 }
 func (db *DBORM) SmtpInfoGet() (smtpinfo []models.SmtpInfo, err error) {
 	return smtpinfo, db.Find(&smtpinfo).Error
+}
+func (db *DBORM) GetAllAuthData() (auth []models.Authdetails, err error) {
+
+	return auth, db.Find(&auth).Error
+}
+func(db *DBORM) SaveAuthData(authBinding models.Authdetails) (auth []models.Authdetails, err error) {
+	err = db.Create(&authBinding).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return auth, db.Find(&auth).Error
 }

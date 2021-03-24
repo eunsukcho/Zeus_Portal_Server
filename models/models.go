@@ -64,16 +64,16 @@ func (TopMenuIcon) TableName() string {
 type Env_setting_Tbls struct {
 	ThemeSettingVal string `gorm:"column:theme_setting_val" binding:"required" json:"themeSettingVal"`
 	LangSettingVal  string `gorm:"column:lang_setting_val" binding:"required" json:"langSettingVal"`
-	AutoLogoutVal   string `gorm:"column:auto_logout_val" binding:"required" json:"autoLogoutVal"`
+	AutoLogoutVal   bool `gorm:"type:boolean; column:auto_logout_val" binding:"required" json:"autoLogoutVal"`
 	PortalVersion   int    `gorm:"column:portal_version" binding:"required" json:"portalVersion"`
-	UserRegisterAuth string `gorm:"column:user_register_auth" binding:"required" json:"userRegisterAuth"`
+	UserRegisterAuth bool `gorm:"type:boolean; column:user_register_auth" binding:"required" json:"userRegisterAuth"`
 }
 type Envs struct {
 	ThemeSettingVal string `binding:"required" json:"themeSettingVal"`
 	LangSettingVal  string `binding:"required" json:"langSettingVal"`
-	AutoLogoutVal   string `binding:"required" json:"autoLogoutVal"`
+	AutoLogoutVal   bool `binding:"required" json:"autoLogoutVal"`
 	PortalVersion   int    `binding:"required" json:"zoneVersionportalVersion"`
-	UserRegisterAuth string `binding:"required" json:"userRegisterAuth"`
+	UserRegisterAuth bool `binding:"required" json:"userRegisterAuth"`
 }
 
 func (Env_setting_Tbls) TableName() string {

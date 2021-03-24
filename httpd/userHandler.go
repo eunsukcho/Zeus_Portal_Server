@@ -18,6 +18,7 @@ type RequestHandlerInterface interface {
 	UserClientInit(c *gin.Context)
 	DeleteUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
+	UpdateUserCredentials(c *gin.Context)
 
 	GroupsList(c *gin.Context)
 	RegisterToken(c *gin.Context)
@@ -193,6 +194,33 @@ func (h *RequestHandler) UpdateUser(c *gin.Context) {
 	})
 }
 
+func (h *RequestHandler) UpdateUserCredentials(c *gin.Context) {
+	if h.client == nil {
+		fmt.Println("h.client is nill")
+		h.UserClientInit(c)
+	}
+
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.Id)
+
+	rst, err := h.requestH.UpdateUserCredentialsApi(h.ctx, uri.Id, h.client)
+
+	if err != nil {
+		fmt.Println("request user delete error 발생")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   rst,
+	})
+}
 func (h *RequestHandler) GroupsList(c *gin.Context) {
 	if h.client == nil {
 		fmt.Println("h.client is nill")

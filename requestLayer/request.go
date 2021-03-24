@@ -120,7 +120,6 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 
 	resp, err := client.Post(
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users",
-		//"http://192.168.0.118:9090/auth/admin/realms/parthenon/users",
 		"application/json",
 		buff,
 	)
@@ -160,8 +159,8 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *ht
 
 		return "error", err
 	}
-
-	return "", nil
+	respBody, err := ioutil.ReadAll(resp.Body)
+	return string(respBody), nil
 }
 
 func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
@@ -184,7 +183,6 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 
-	fmt.Println(resp.StatusCode)
 	if err != nil || resp.StatusCode != 204 {
 		fmt.Println("register error")
 		fmt.Println(err)
@@ -192,10 +190,39 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(respBody))
 	if err != nil {
 		return "", err
 	}
+	return string(respBody), nil
+}
+
+func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string, client *http.Client) (string, error) {
+
+	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
+	
+	ubytes, _ := json.Marshal([]string{"UPDATE_PASSWORD"})
+	buff := bytes.NewBuffer(ubytes)
+
+	req, err := http.NewRequest(
+		"PUT",
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"+user+"/execute-actions-email?redirect_uri?http://192.168.0.102:4201",
+		buff,
+	)
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return "error", err
+	}
+	
+	resp, err := client.Do(req)
+	
+	if err != nil || resp.StatusCode != 204 {
+		t, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("str : " + string(t))
+
+		return "error", err
+	}
+	respBody, err := ioutil.ReadAll(resp.Body)
+	
 	return string(respBody), nil
 }
 

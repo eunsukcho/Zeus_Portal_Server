@@ -6,11 +6,15 @@ type AdminAPIInfo struct {
 }
 
 type Authdetails struct {
-	ClientId    	string `json:"clientId" binding:"required"`
-	ClientSecret    string `json:"clientSecret" binding:"required"`
-	AdminId     	string `json:"adminId" binding:"required"`
-	AdminPw     	string `json:"adminPw" binding:"required"`
-	TokenUrl       	string `json:"tokenUrl" binding:"required"`
+	ClientId    	string `gorm:"column:client_id" json:"clientId" binding:"required"`
+	ClientSecret    string `gorm:"column:client_secret" json:"clientSecret" binding:"required"`
+	AdminId     	string `gorm:"column:admin_id" json:"adminId" binding:"required"`
+	AdminPw     	string `gorm:"column:admin_pw" json:"adminPw" binding:"required"`
+	TokenUrl       	string `gorm:"column:token_url" json:"tokenUrl" binding:"required"`
+}
+
+func (Authdetails) TableName() string {
+	return "admin_auth_tbls"
 }
 
 type UserListData struct {
@@ -46,9 +50,9 @@ type UserInfo struct {
 }
 
 type userAttribute struct {
-	DepartmentNm string `json:"departmentNm" binding:"required"`
-	Position     string `json:"position" binding:"required"`
-	PhoneNumber  string `json:"phoneNumber" binding:"required"`
+	DepartmentNm []string `json:"departmentNm" binding:"required"`
+	Position     []string `json:"position" binding:"required"`
+	PhoneNumber  []string `json:"phoneNumber" binding:"required"`
 }
 type resUserAttributes struct {
 	DepartmentNm []string `json:"departmentNm" binding:"required"`

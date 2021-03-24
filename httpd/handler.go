@@ -38,6 +38,10 @@ type HandlerInterface interface {
 	GetTopMenuTargetUrl(c *gin.Context)
 	UpdateTopMenuInfo(c *gin.Context)
 	UpdateSubMenuInfo(c *gin.Context)
+
+	//auth setting
+	AuthInfoData(c *gin.Context)
+	SaveAuthData(c *gin.Context)
 }
 
 type Handler struct {
@@ -82,10 +86,12 @@ func (h *Handler) UpdateEnvData(c *gin.Context) {
 			gin.H{"error": "Server Database error"})
 		return
 	}
-	var env models.Envs
-	err := c.BindJSON(&env)
-
+	var env models.Env_setting_Tbls
+	err := c.ShouldBindJSON(&env)
+	fmt.Println("env : " , env)
+	
 	rst, err := h.db.UpdateEnvData(env)
+	fmt.Println("rst : " , rst)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -606,5 +612,58 @@ func (h *Handler) UpdateSubMenuInfo(c *gin.Context) {
 		"status": http.StatusOK,
 		"isOK":   1,
 		"data":   rst,
+	})
+}
+
+func (h *Handler) AuthInfoData(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+
+	auth_detail_tbls, err := h.db.GetAllAuthData()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Printf("Found %d products\n", len(auth_detail_tbls))
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   auth_detail_tbls,
+		"len" : len(auth_detail_tbls),
+	})
+}
+func (h *Handler) SaveAuthData(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var authDetails models.Authdetails
+	err := c.ShouldBindJSON(&authDetails)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	auth_detail_tbls, err := h.db.SaveAuthData(authDetails)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Printf("Found %d products\n", len(auth_detail_tbls))
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   auth_detail_tbls,
+		"len" : len(auth_detail_tbls),
 	})
 }
