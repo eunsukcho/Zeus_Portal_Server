@@ -51,6 +51,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		authApi.POST("/save_auth", h.SaveAuthData)
 	}
 	userApi := r.Group("/api/user")
+	userApi.Use(rh.UserClientInit)
 	{
 		userApi.POST("/infoInit", rh.UserClientInit)
 		userApi.POST("/user_list/:id", rh.UserList)
@@ -60,6 +61,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		userApi.POST("/update_userCredentials/:id", rh.UpdateUserCredentials)
 	}
 	groupApi := r.Group("/api/groups")
+	groupApi.Use(rh.GroupClientInit)
 	{
 		groupApi.POST("/lt", rh.GroupsList)
 		groupApi.POST("/putKey", rh.RegisterToken)

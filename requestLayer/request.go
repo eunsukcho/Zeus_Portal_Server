@@ -24,6 +24,7 @@ var errConnFail = errors.New("Connection Failed")
 var tokenErr = errors.New("Invalid Token")
 
 func NewAuthInfo(auth models.Authdetails) (*AuthInfo, error) {
+
 	return &AuthInfo{
 		&models.Authdetails {
 			ClientId: auth.ClientId,
@@ -34,11 +35,31 @@ func NewAuthInfo(auth models.Authdetails) (*AuthInfo, error) {
 	}}, nil
 }
 
+func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, bool, error) {
+	fmt.Println("inputAuth : ", inputAuth)
+
+	switch {
+		case inputAuth.ClientId != auth.ClientId :
+			return nil, false, nil
+		case inputAuth.ClientSecret != auth.ClientSecret:
+			return nil, false, nil
+		case inputAuth.AdminId != auth.AdminId :
+			return nil, false, nil
+		case inputAuth.AdminPw != auth.AdminPw:
+			return nil, false, nil
+		case inputAuth.TokenUrl != auth.TokenUrl :
+			return nil, false, nil
+	}
+	return nil, true, nil
+}
+
 func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
+	
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 	token := auth.GetApiClientTokenSource(ctx)
+
 
 	client := OAuthConf.Client(ctx, token)
 	return client, nil
