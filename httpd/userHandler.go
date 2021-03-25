@@ -35,13 +35,13 @@ type RequestHandler struct {
 func NewRequestHandler() (RequestHandlerInterface, error) {
 	var authBinding models.Authdetails
 	auth, err := requestLayer.NewAuthInfo(authBinding)
-	
+
 	if err != nil {
 		return nil, err
 	}
 	return &RequestHandler{
 		requestH: auth,
-		ctx : context.Background(),
+		ctx:      context.Background(),
 	}, nil
 }
 
@@ -50,7 +50,7 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	var authBinding models.AdminAPIInfo
 
 	if err := c.ShouldBindJSON(&authBinding); err != nil {
-		fmt.Println("binding error",  err.Error())
+		fmt.Println("binding error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -67,8 +67,8 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 			c.Abort()
 		}
 		h.client = apiClient
-	}	
-	fmt.Println("auth User : " , authBinding.User)
+	}
+	fmt.Println("auth User : ", authBinding.User)
 	c.Set("User", authBinding.User)
 	c.Next()
 }
@@ -80,45 +80,45 @@ func (h *RequestHandler) GroupClientInit(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println("Group init : " , authBinding)
+	fmt.Println("Group init : ", authBinding)
 	var rst bool
 	if h.authInfo != nil {
 		rst, _ = CompareInfo(authBinding.Admin, h.authInfo)
 	}
 	auth, _ := requestLayer.NewAuthInfo(authBinding.Admin)
 	h.authInfo = auth
-	
+
 	if rst == false {
 		apiClient, err := requestLayer.GetClient(h.ctx, h.authInfo)
 		if err != nil {
 			c.Abort()
 		}
 		h.client = apiClient
-	}	
+	}
 	c.Set("Groups", authBinding.Groups)
 	c.Next()
 }
 
 func CompareInfo(inputAuth models.Authdetails, initInfo *requestLayer.AuthInfo) (bool, error) {
 	switch {
-		case inputAuth.ClientId != initInfo.ClientId :
-			return false, nil
-		case inputAuth.ClientSecret != initInfo.ClientSecret:
-			return false, nil
-		case inputAuth.AdminId != initInfo.AdminId :
-			return false, nil
-		case inputAuth.AdminPw != initInfo.AdminPw:
-			return false, nil
-		case inputAuth.TokenUrl != initInfo.TokenUrl :
-			return false, nil
+	case inputAuth.ClientId != initInfo.ClientId:
+		return false, nil
+	case inputAuth.ClientSecret != initInfo.ClientSecret:
+		return false, nil
+	case inputAuth.AdminId != initInfo.AdminId:
+		return false, nil
+	case inputAuth.AdminPw != initInfo.AdminPw:
+		return false, nil
+	case inputAuth.TokenUrl != initInfo.TokenUrl:
+		return false, nil
 	}
 	return true, nil
 }
 
 func (h *RequestHandler) UserList(c *gin.Context) {
-	
+
 	/**
-		User List End point 
+		User List End point
 			1) all - all list
 			2) user id - user info
 	**/
@@ -131,7 +131,7 @@ func (h *RequestHandler) UserList(c *gin.Context) {
 		return
 	}
 	fmt.Println("userID : ", uri.Id)
-	
+
 	// End point에 따라 분기
 	h.RequestUserInfo(uri.Id, c)
 }
@@ -140,7 +140,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 	if id == "all" {
 		var userinfo []models.ResponseUserInfo
 		var err error
-	
+
 		userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
 		if err != nil {
 			fmt.Println("RequestUserListApi error 발생")
@@ -148,7 +148,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 			userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
 		}
 		for _, value := range userinfo {
-			fmt.Println("userList :" ,value)
+			fmt.Println("userList :", value)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": http.StatusOK,
@@ -158,7 +158,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 	if id != "all" {
 		var userinfo models.ResponseUserInfo
 		var err error
-	
+
 		userinfo, err = h.requestH.RequestOneUserApi(h.ctx, id, h.client)
 		if err != nil {
 			fmt.Println("RequestUserListApi error 발생")
@@ -173,7 +173,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 }
 
 func (h *RequestHandler) RegisterUser(c *gin.Context) {
-	
+
 	regi := c.MustGet("User").(models.RegisterUserInfo)
 	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.client)
 	if err != nil {
@@ -269,7 +269,7 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 func (h *RequestHandler) RegisterToken(c *gin.Context) {
 
 	regi := c.MustGet("Groups").(models.ReqToken)
-	fmt.Println("test : " , regi)
+	fmt.Println("test : ", regi)
 
 	rst, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.client)
 	if err != nil {

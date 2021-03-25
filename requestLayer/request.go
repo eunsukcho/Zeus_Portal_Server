@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	_ "strings"
 	"time"
 	"zeus/models"
-	"errors"
-	_"strings"
+
 	"golang.org/x/oauth2"
 )
 
@@ -20,46 +21,46 @@ var OAuthConf *oauth2.Config
 type AuthInfo struct {
 	*models.Authdetails
 }
+
 var errConnFail = errors.New("Connection Failed")
 var tokenErr = errors.New("Invalid Token")
 
 func NewAuthInfo(auth models.Authdetails) (*AuthInfo, error) {
 
 	return &AuthInfo{
-		&models.Authdetails {
-			ClientId: auth.ClientId,
+		&models.Authdetails{
+			ClientId:     auth.ClientId,
 			ClientSecret: auth.ClientSecret,
-			AdminId:  auth.AdminId,
-			AdminPw:  auth.AdminPw,
-			TokenUrl: auth.TokenUrl,
-	}}, nil
+			AdminId:      auth.AdminId,
+			AdminPw:      auth.AdminPw,
+			TokenUrl:     auth.TokenUrl,
+		}}, nil
 }
 
 func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, bool, error) {
 	fmt.Println("inputAuth : ", inputAuth)
 
 	switch {
-		case inputAuth.ClientId != auth.ClientId :
-			return nil, false, nil
-		case inputAuth.ClientSecret != auth.ClientSecret:
-			return nil, false, nil
-		case inputAuth.AdminId != auth.AdminId :
-			return nil, false, nil
-		case inputAuth.AdminPw != auth.AdminPw:
-			return nil, false, nil
-		case inputAuth.TokenUrl != auth.TokenUrl :
-			return nil, false, nil
+	case inputAuth.ClientId != auth.ClientId:
+		return nil, false, nil
+	case inputAuth.ClientSecret != auth.ClientSecret:
+		return nil, false, nil
+	case inputAuth.AdminId != auth.AdminId:
+		return nil, false, nil
+	case inputAuth.AdminPw != auth.AdminPw:
+		return nil, false, nil
+	case inputAuth.TokenUrl != auth.TokenUrl:
+		return nil, false, nil
 	}
 	return nil, true, nil
 }
 
 func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
-	
+
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 	token := auth.GetApiClientTokenSource(ctx)
-
 
 	client := OAuthConf.Client(ctx, token)
 	return client, nil
@@ -80,7 +81,7 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 	if err != nil {
 		panic(err)
 	}
-	
+
 	return token
 }
 
@@ -89,7 +90,7 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 	resp, err := client.Get(
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/",
 	)
-	
+
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Connection Error")
 	}
@@ -102,7 +103,7 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 
 		return *userinfo, nil
 	}
-	
+
 	return nil, errConnFail
 
 }
@@ -111,9 +112,9 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client
 	log.Printf("[DEBUG] Fetching API Client - Request One User Api")
 
 	resp, err := client.Get(
-		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"+user,
+		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/" + user,
 	)
-	
+
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Connection Error")
 	}
@@ -126,10 +127,9 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client
 
 		return *userinfo, nil
 	}
-	
+
 	return models.ResponseUserInfo{}, errConnFail
 }
-
 
 func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
 
@@ -148,6 +148,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	if err != nil || resp.StatusCode != 201 {
 		fmt.Println("register error")
 		fmt.Println(err)
+
 	}
 	defer resp.Body.Close()
 
@@ -161,7 +162,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 
 func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *http.Client) (string, error) {
 	log.Printf("[DEBUG] Fetching API Client - Delete User Api")
-	
+
 	req, err := http.NewRequest(
 		"DELETE",
 		"https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"+user,
@@ -171,9 +172,9 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *ht
 	if err != nil {
 		return "error", err
 	}
-	
+
 	resp, err := client.Do(req)
-	
+
 	if err != nil || resp.StatusCode != 204 {
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
@@ -220,7 +221,7 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string, client *http.Client) (string, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
-	
+
 	ubytes, _ := json.Marshal([]string{"UPDATE_PASSWORD"})
 	buff := bytes.NewBuffer(ubytes)
 
@@ -233,9 +234,9 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 	if err != nil {
 		return "error", err
 	}
-	
+
 	resp, err := client.Do(req)
-	
+
 	if err != nil || resp.StatusCode != 204 {
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
@@ -243,7 +244,7 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 		return "error", err
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
-	
+
 	return string(respBody), nil
 }
 
@@ -288,7 +289,7 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
-	
+
 	if err != nil || resp.StatusCode != 204 {
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
