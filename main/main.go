@@ -25,5 +25,5 @@ func CORSMiddelware() gin.HandlerFunc {
 
 func main() {
 	log.Println("Main log....")
-	log.Fatal(httpd.RunAPI("127.0.0.1:3000"))
+	log.Fatal(httpd.RunAPI(":3000"))
 }
