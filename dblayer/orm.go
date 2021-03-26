@@ -102,11 +102,12 @@ func (db *DBORM) SmtpInfoTest() ([]models.SmtpInfo, error) {
 func (db *DBORM) SmtpInfoGet() (smtpinfo []models.SmtpInfo, err error) {
 	return smtpinfo, db.Find(&smtpinfo).Error
 }
+
 func (db *DBORM) GetAllAuthData() (auth []models.Authdetails, err error) {
 
 	return auth, db.Find(&auth).Error
 }
-func(db *DBORM) SaveAuthData(authBinding models.Authdetails) (auth []models.Authdetails, err error) {
+func (db *DBORM) SaveAuthData(authBinding models.Authdetails) (auth []models.Authdetails, err error) {
 	err = db.Create(&authBinding).Error
 	if err != nil {
 		return nil, err

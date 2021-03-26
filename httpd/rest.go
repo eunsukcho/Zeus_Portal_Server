@@ -26,6 +26,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		smtpApi.POST("/register_smtp", h.Smtptest)
 		smtpApi.POST("/smtpsave", h.SmtpSave)
 		smtpApi.GET("/smtpget", h.SmtpGet)
+		smtpApi.POST("/sendmail", h.SendMail)
 	}
 	menuApi := r.Group("/api/menu")
 	{

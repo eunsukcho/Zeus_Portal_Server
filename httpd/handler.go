@@ -21,7 +21,7 @@ type HandlerInterface interface {
 	Smtptest(c *gin.Context)
 	SmtpSave(c *gin.Context)
 	SmtpGet(c *gin.Context)
-
+	SendMail(c *gin.Context)
 	//menu setting
 	GetTopMenuData(c *gin.Context)
 	SubTopMenuData(c *gin.Context)
@@ -88,10 +88,10 @@ func (h *Handler) UpdateEnvData(c *gin.Context) {
 	}
 	var env models.Env_setting_Tbls
 	err := c.ShouldBindJSON(&env)
-	fmt.Println("env : " , env)
-	
+	fmt.Println("env : ", env)
+
 	rst, err := h.db.UpdateEnvData(env)
-	fmt.Println("rst : " , rst)
+	fmt.Println("rst : ", rst)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -154,6 +154,7 @@ func (h *Handler) SmtpSave(c *gin.Context) {
 
 	err := c.BindJSON(&smtpinfo)
 	err = SmtpConnectionCheck(&smtpinfo)
+
 	smtpinfo.Password = string(password)
 
 	if err != nil {
@@ -192,6 +193,40 @@ func (h *Handler) SmtpGet(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, smtpinfo)
+}
+
+func (h *Handler) SendMail(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"error": "Server Database error"})
+		return
+	}
+	var smtpinfo models.SmtpInfo
+	c.BindJSON(&smtpinfo)
+	password := smtpinfo.Password
+
+	port, _ := strconv.Atoi(smtpinfo.Port)
+	d := gomail.NewDialer(smtpinfo.SmtpAddress, port, smtpinfo.AdminAddress, password)
+	s, err := d.Dial()
+	if err != nil {
+		fmt.Println("error 발생")
+		fmt.Println(smtpinfo.AdminAddress)
+		fmt.Println(smtpinfo.Password)
+		fmt.Println(err.Error())
+		return
+	}
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", smtpinfo.AdminAddress)
+	m.SetAddressHeader("To", "dudco0355@naver.com", "test")
+	m.SetHeader("Subject", "testtest")
+	m.SetBody("text/html", fmt.Sprintf("Hello %s!", "test"))
+
+	if err := gomail.Send(s, m); err != nil {
+		fmt.Println("fail")
+	}
+	fmt.Println(smtpinfo.AdminAddress)
+	m.Reset()
 }
 
 //menu setting
@@ -633,7 +668,7 @@ func (h *Handler) AuthInfoData(c *gin.Context) {
 		"status": http.StatusOK,
 		"isOK":   1,
 		"data":   auth_detail_tbls,
-		"len" : len(auth_detail_tbls),
+		"len":    len(auth_detail_tbls),
 	})
 }
 func (h *Handler) SaveAuthData(c *gin.Context) {
@@ -664,6 +699,6 @@ func (h *Handler) SaveAuthData(c *gin.Context) {
 		"status": http.StatusOK,
 		"isOK":   1,
 		"data":   auth_detail_tbls,
-		"len" : len(auth_detail_tbls),
+		"len":    len(auth_detail_tbls),
 	})
 }
