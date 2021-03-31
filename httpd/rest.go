@@ -27,6 +27,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		smtpApi.POST("/smtpsave", h.SmtpSave)
 		smtpApi.GET("/smtpget", h.SmtpGet)
 		smtpApi.POST("/sendmail", h.SendMail)
+		smtpApi.POST("/invitation", h.InvitationUser)
 	}
 	menuApi := r.Group("/api/menu")
 	{
@@ -56,6 +57,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	{
 		userApi.POST("/infoInit", rh.UserClientInit)
 		userApi.POST("/user_list/:id", rh.UserList)
+		userApi.POST("/userListByGroup/:id/members", rh.UserListByGroup)
 		userApi.POST("/register_user", rh.RegisterUser)
 		userApi.POST("/delete_user/:id", rh.DeleteUser)
 		userApi.POST("/update_user", rh.UpdateUser)
@@ -64,9 +66,10 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	groupApi := r.Group("/api/groups")
 	groupApi.Use(rh.GroupClientInit)
 	{
-		groupApi.POST("/lt", rh.GroupsList)
+		groupApi.POST("/lt/:id", rh.GroupsList)
 		groupApi.POST("/putKey", rh.RegisterToken)
 	}
+
 
 	return r.Run(address)
 }

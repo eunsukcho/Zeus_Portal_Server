@@ -52,7 +52,7 @@ type UserInfo struct {
 	Username  string `json:"username"`
 	FirstName string `json:"firstName"`
 	LastName  string ` json:"lastName"`
-	Enabled   string `json:"enabled"`
+	Enabled   bool `json:"enabled"`
 	Email     string `json:"email"`
 }
 

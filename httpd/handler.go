@@ -1,6 +1,7 @@
 package httpd
 
 import (
+	"log"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -8,11 +9,13 @@ import (
 	"zeus/models"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
+	_"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 )
 
 type HandlerInterface interface {
+	DBConnectionCheck (c *gin.Context)
+
 	//env setting
 	GetEnvData(c *gin.Context)
 	UpdateEnvData(c *gin.Context)
@@ -22,6 +25,7 @@ type HandlerInterface interface {
 	SmtpSave(c *gin.Context)
 	SmtpGet(c *gin.Context)
 	SendMail(c *gin.Context)
+
 	//menu setting
 	GetTopMenuData(c *gin.Context)
 	SubTopMenuData(c *gin.Context)
@@ -42,6 +46,9 @@ type HandlerInterface interface {
 	//auth setting
 	AuthInfoData(c *gin.Context)
 	SaveAuthData(c *gin.Context)
+
+	//Invitation User
+	InvitationUser(c *gin.Context)
 }
 
 type Handler struct {
@@ -62,14 +69,16 @@ func NewHandlerWithParams() (HandlerInterface, error) {
 	}, nil
 }
 
-// init zeus env
-func (h *Handler) GetEnvData(c *gin.Context) {
+func (h *Handler) DBConnectionCheck(c *gin.Context) {
 	if h.db == nil {
 		c.JSON(http.StatusInternalServerError,
 			gin.H{"error": "Server Database error"})
 		return
 	}
+}
 
+// init zeus env
+func (h *Handler) GetEnvData(c *gin.Context) {
 	env_setting_tbls, err := h.db.GetAllEnvData()
 
 	if err != nil {
@@ -81,11 +90,6 @@ func (h *Handler) GetEnvData(c *gin.Context) {
 }
 
 func (h *Handler) UpdateEnvData(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var env models.Env_setting_Tbls
 	err := c.ShouldBindJSON(&env)
 	fmt.Println("env : ", env)
@@ -144,18 +148,13 @@ func (h *Handler) Smtptest(c *gin.Context) {
 }
 
 func (h *Handler) SmtpSave(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var smtpinfo models.SmtpInfo
-	password, _ := bcrypt.GenerateFromPassword([]byte(smtpinfo.Password), bcrypt.DefaultCost)
+	//password, _ := bcrypt.GenerateFromPassword([]byte(smtpinfo.Password), bcrypt.DefaultCost)
 
 	err := c.BindJSON(&smtpinfo)
 	err = SmtpConnectionCheck(&smtpinfo)
 
-	smtpinfo.Password = string(password)
+	//smtpinfo.Password = string(password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -179,12 +178,7 @@ func (h *Handler) SmtpSave(c *gin.Context) {
 }
 
 func (h *Handler) SmtpGet(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
-
+	
 	smtpinfo, err := h.db.SmtpInfoGet()
 
 	if err != nil {
@@ -196,11 +190,7 @@ func (h *Handler) SmtpGet(c *gin.Context) {
 }
 
 func (h *Handler) SendMail(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
+	
 	var smtpinfo models.SmtpInfo
 	c.BindJSON(&smtpinfo)
 	password := smtpinfo.Password
@@ -209,16 +199,14 @@ func (h *Handler) SendMail(c *gin.Context) {
 	d := gomail.NewDialer(smtpinfo.SmtpAddress, port, smtpinfo.AdminAddress, password)
 	s, err := d.Dial()
 	if err != nil {
-		fmt.Println("error 발생")
-		fmt.Println(smtpinfo.AdminAddress)
-		fmt.Println(smtpinfo.Password)
-		fmt.Println(err.Error())
+		log.Println(err.Error(), smtpinfo)
 		return
 	}
 
+	fmt.Println("SMTP Info : ", smtpinfo)
 	m := gomail.NewMessage()
 	m.SetHeader("From", smtpinfo.AdminAddress)
-	m.SetAddressHeader("To", "dudco0355@naver.com", "test")
+	m.SetAddressHeader("To", smtpinfo.AdminAddress, "test")
 	m.SetHeader("Subject", "testtest")
 	m.SetBody("text/html", fmt.Sprintf("Hello %s!", "test"))
 
@@ -231,11 +219,6 @@ func (h *Handler) SendMail(c *gin.Context) {
 
 //menu setting
 func (h *Handler) GetTopMenuData(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 
 	top_menu, err := h.db.GetAllTopMenu()
 
@@ -247,11 +230,6 @@ func (h *Handler) GetTopMenuData(c *gin.Context) {
 	c.JSON(http.StatusOK, top_menu)
 }
 func (h *Handler) SubTopMenuData(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 
 	sub_menu, err := h.db.GetAllSubMenu()
 
@@ -263,11 +241,6 @@ func (h *Handler) SubTopMenuData(c *gin.Context) {
 	c.JSON(http.StatusOK, sub_menu)
 }
 func (h *Handler) SaveTopMenu(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var topMenu models.TopMenuInfo
 	err := c.ShouldBindJSON(&topMenu)
 
@@ -292,11 +265,6 @@ func (h *Handler) SaveTopMenu(c *gin.Context) {
 	})
 }
 func (h *Handler) SaveSubMenu(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var subMenu models.SubMenuInfo
 
 	err := c.ShouldBindJSON(&subMenu)
@@ -321,11 +289,6 @@ func (h *Handler) SaveSubMenu(c *gin.Context) {
 	})
 }
 func (h *Handler) DeleteTopMenu(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var topMenu models.TopMenuInfo
 
 	err := c.BindJSON(&topMenu)
@@ -350,11 +313,6 @@ func (h *Handler) DeleteTopMenu(c *gin.Context) {
 	})
 }
 func (h *Handler) DeleteSubMenu(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var subMenu models.SubMenuInfo
 
 	err := c.BindJSON(&subMenu)
@@ -378,11 +336,7 @@ func (h *Handler) DeleteSubMenu(c *gin.Context) {
 	})
 }
 func (h *Handler) GetIcon(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
+
 	icon, err := h.db.GetAllIcon()
 
 	if err != nil {
@@ -394,11 +348,7 @@ func (h *Handler) GetIcon(c *gin.Context) {
 }
 
 func (h *Handler) SaveUrlLink(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
+	
 	var topMenu models.TopMenuInfo
 	err := c.ShouldBindJSON(&topMenu)
 
@@ -426,11 +376,6 @@ func (h *Handler) SaveUrlLink(c *gin.Context) {
 
 }
 func (h *Handler) SaveUrlSubLink(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var subMenu models.SubMenuInfo
 	err := c.ShouldBindJSON(&subMenu)
 	if err != nil {
@@ -458,11 +403,6 @@ func (h *Handler) SaveUrlSubLink(c *gin.Context) {
 }
 
 func (h *Handler) DeleteTopMenuUrl(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var topMenu models.TopMenuInfo
 	err := c.BindJSON(&topMenu)
 
@@ -489,11 +429,6 @@ func (h *Handler) DeleteTopMenuUrl(c *gin.Context) {
 }
 
 func (h *Handler) DeleteSubMenuUrl(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var subMenu models.SubMenuInfo
 	err := c.BindJSON(&subMenu)
 
@@ -518,11 +453,6 @@ func (h *Handler) DeleteSubMenuUrl(c *gin.Context) {
 	})
 }
 func (h *Handler) GetMenuTargetUrl(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var menuCode models.SubMenuInfo
 	err := c.ShouldBindJSON(&menuCode)
 	if err != nil {
@@ -551,11 +481,6 @@ func (h *Handler) GetMenuTargetUrl(c *gin.Context) {
 
 }
 func (h *Handler) GetTopMenuTargetUrl(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var menuCode models.TopMenuInfo
 	err := c.ShouldBindJSON(&menuCode)
 	if err != nil {
@@ -585,12 +510,6 @@ func (h *Handler) GetTopMenuTargetUrl(c *gin.Context) {
 }
 
 func (h *Handler) UpdateTopMenuInfo(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
-
 	var topMenu models.TopMenuInfo
 	err := c.ShouldBindJSON(&topMenu)
 	if err != nil {
@@ -618,12 +537,6 @@ func (h *Handler) UpdateTopMenuInfo(c *gin.Context) {
 }
 
 func (h *Handler) UpdateSubMenuInfo(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
-
 	var subMenu models.SubMenuInfo
 	err := c.ShouldBindJSON(&subMenu)
 	if err != nil {
@@ -651,12 +564,6 @@ func (h *Handler) UpdateSubMenuInfo(c *gin.Context) {
 }
 
 func (h *Handler) AuthInfoData(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
-
 	auth_detail_tbls, err := h.db.GetAllAuthData()
 
 	if err != nil {
@@ -672,11 +579,6 @@ func (h *Handler) AuthInfoData(c *gin.Context) {
 	})
 }
 func (h *Handler) SaveAuthData(c *gin.Context) {
-	if h.db == nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"error": "Server Database error"})
-		return
-	}
 	var authDetails models.Authdetails
 	err := c.ShouldBindJSON(&authDetails)
 	if err != nil {
@@ -691,7 +593,7 @@ func (h *Handler) SaveAuthData(c *gin.Context) {
 	auth_detail_tbls, err := h.db.SaveAuthData(authDetails)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	fmt.Printf("Found %d products\n", len(auth_detail_tbls))
@@ -701,4 +603,55 @@ func (h *Handler) SaveAuthData(c *gin.Context) {
 		"data":   auth_detail_tbls,
 		"len":    len(auth_detail_tbls),
 	})
+}
+func (h *Handler) InvitationUser(c *gin.Context) {
+	var inviteInfo models.Invitation
+	var err error
+
+	c.BindJSON(&inviteInfo)
+	accessAuth := inviteInfo.AccessAuth
+	invitationAddress := inviteInfo.InvitationAddress
+
+	fmt.Println(accessAuth, invitationAddress)
+	
+	var smtpinfo []models.SmtpInfo
+	smtpinfo, err = h.db.SmtpInfoGet()
+	if(err == nil) {
+		fmt.Println(smtpinfo)
+	}
+	if sendInvitataionEmail(accessAuth, invitationAddress, smtpinfo) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":http.StatusBadRequest,
+		})
+		return 
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":http.StatusOK,
+	})
+}
+
+func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo []models.SmtpInfo) error {
+	port, _ := strconv.Atoi(smtpinfo[0].Port)
+	d := gomail.NewDialer(smtpinfo[0].SmtpAddress, port, smtpinfo[0].AdminAddress, smtpinfo[0].Password)
+	s, err := d.Dial()
+	if err != nil {
+		log.Println(err.Error(), smtpinfo)
+		return err
+	} 
+
+	userRegisterLink := "http://192.168.0.102:4201/user/invitation/"+accessAuth
+	
+	fmt.Println("SMTP Info : ", smtpinfo)
+	m := gomail.NewMessage()
+	m.SetHeader("From", smtpinfo[0].AdminAddress)
+	m.SetAddressHeader("To", invitationAddress, invitationAddress)
+	m.SetHeader("Subject", "개발자 등록 요청")
+	m.SetBody("text/html", fmt.Sprintf("아래의 링크를 복사해서 붙여넣으세요. %s", userRegisterLink))
+
+	if err := gomail.Send(s, m); err != nil {
+		return fmt.Errorf(
+			"Could not send email to %q: %v", invitationAddress, err)
+	}
+	m.Reset()
+	return nil
 }

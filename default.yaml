@@ -5,10 +5,13 @@
           db_username: "postgres"
           db_password: "Jointree!123"
   
-keycloak:
-  userEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users"
-  groupEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups"
-
-     
+  keycloak:
+    ope:
+      userEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"
+      groupEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups/"
+    dev:
+      userEndpoint: "http://192.168.0.118:8080/auth/admin/realms/parthenon/users/"
+      groupEndpoint: "http://192.168.0.118:8080/auth/admin/realms/parthenon/groups/"
+      
        
 

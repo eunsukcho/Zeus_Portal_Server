@@ -6,6 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type Invitation struct {
+	AccessAuth		 string `json:"AccessAuth"`
+	InvitationAddress string `json:"InvitationAddress"`
+}
 type SmtpInfo struct {
 	gorm.Model
 	AdminAddress string `gorm:"column:smtp_user" json:"AdminAddress" binding:"required"`

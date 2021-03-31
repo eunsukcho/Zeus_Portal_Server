@@ -9,14 +9,15 @@ import (
 )
 
 type RequestLayer interface {
-	GetApiClientTokenSource(context.Context) *oauth2.Token
+	GetApiClientTokenSource(context.Context) (*oauth2.Token, error)
 	RequestUserListApi(context.Context, *http.Client) ([]models.ResponseUserInfo, error)
+	RequestUserListByGroupApi(context.Context, string, *http.Client) ([]models.ResponseUserInfo, error)
 	RequestOneUserApi(context.Context, string, *http.Client) (models.ResponseUserInfo, error)
 	RequestRegisterUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, error)
 	DeleteUserApi(context.Context, string, *http.Client) (string, error)
 	UpdateUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, error)
 	UpdateUserCredentialsApi(context.Context, string, *http.Client) (string, error)
 
-	RequestGroupListApi(context.Context, *http.Client) ([]models.ResGroupInfo, error)
+	RequestGroupListApi(context.Context, string, *http.Client) ([]models.ResGroupInfo, error)
 	RequestRegisterGroupsApi(context.Context, models.ReqToken, *http.Client) (string, error)
 }
