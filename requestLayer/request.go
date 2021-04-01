@@ -63,6 +63,7 @@ func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 	token, err := auth.GetApiClientTokenSource(ctx)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -83,8 +84,8 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) (*oauth2.Toke
 
 	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
 	if err != nil {
-		panic(err)
-		//return nil, err
+		
+		return nil, err
 	}
 
 	return token, nil
