@@ -49,6 +49,9 @@ type HandlerInterface interface {
 
 	//Invitation User
 	InvitationUser(c *gin.Context)
+	CreateDevUser(c *gin.Context)
+	GetDevUser(c *gin.Context)
+	AcceptUser(c *gin.Context)
 }
 
 type Handler struct {
@@ -604,6 +607,70 @@ func (h *Handler) SaveAuthData(c *gin.Context) {
 		"len":    len(auth_detail_tbls),
 	})
 }
+
+func (h *Handler) CreateDevUser(c *gin.Context) {
+	var dev models.Dev_Info
+	err := c.ShouldBindJSON(&dev)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": http.StatusBadRequest,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	devInfo, err := h.db.SaveDevUserInfo(dev)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(devInfo)
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   devInfo,
+	})
+}
+func (h *Handler) GetDevUser(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.Id)
+
+	devuser_info_tbls, err := h.db.GetDevUserInfo(uri.Id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Printf("Found %d products\n", len(devuser_info_tbls))
+	c.JSON(http.StatusOK, devuser_info_tbls)
+}
+func (h *Handler) AcceptUser(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.Id)
+	accept_dev, err := h.db.AcceptUpdateUser(uri.Id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Printf("Found %d products\n", accept_dev)
+	c.JSON(http.StatusOK, gin.H{
+		"status":http.StatusOK,
+		"message":"success",
+	})
+}
+
 func (h *Handler) InvitationUser(c *gin.Context) {
 	var inviteInfo models.Invitation
 	var err error
@@ -620,8 +687,9 @@ func (h *Handler) InvitationUser(c *gin.Context) {
 		fmt.Println(smtpinfo)
 	}
 	if sendInvitataionEmail(accessAuth, invitationAddress, smtpinfo) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status":http.StatusBadRequest,
+			"message": "Error",
 		})
 		return 
 	}
@@ -639,7 +707,7 @@ func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo 
 		return err
 	} 
 
-	userRegisterLink := "http://192.168.0.102:4201/user/invitation/"+accessAuth
+	userRegisterLink := "http://192.168.0.102:4201/user/invitation/"+accessAuth+"/"+invitationAddress
 	
 	fmt.Println("SMTP Info : ", smtpinfo)
 	m := gomail.NewMessage()
@@ -655,3 +723,4 @@ func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo 
 	m.Reset()
 	return nil
 }
+

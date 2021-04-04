@@ -36,9 +36,13 @@ type UserListData struct {
 type RegisterUserInfo struct {
 	ID string `json:"id"`
 	UserInfo
-	Groups     []string          `json:"groups"`
+	Groups     []string          `json:"groups" gorm:"column:groups"`
 	Attributes userAttribute     `json:"attributes"`
 	Credential []userCredentilas `json:"credentials"`
+}
+
+func (RegisterUserInfo) TableName() string {
+	return "dev_tmp_tbls"
 }
 
 type ResponseUserInfo struct {
@@ -49,17 +53,17 @@ type ResponseUserInfo struct {
 }
 
 type UserInfo struct {
-	Username  string `json:"username"`
-	FirstName string `json:"firstName"`
-	LastName  string ` json:"lastName"`
-	Enabled   bool `json:"enabled"`
-	Email     string `json:"email"`
+	Username  string `json:"username" gorm:"column:username"`
+	FirstName string `json:"firstName" gorm:"column:firstname"`
+	LastName  string ` json:"lastName" gorm:"column:lastname"`
+	Enabled   bool `json:"enabled" gorm:"column:enabled"`
+	Email     string `json:"email" gorm:"column:email"`
 }
 
 type userAttribute struct {
-	DepartmentNm []string `json:"departmentNm"`
-	Position     []string `json:"position"`
-	PhoneNumber  []string `json:"phoneNumber" `
+	DepartmentNm []string `json:"departmentNm" gorm:"column:theme_setting_val"`
+	Position     []string `json:"position" gorm:"column:theme_setting_val"`
+	PhoneNumber  []string `json:"phoneNumber" gorm:"column:theme_setting_val"`
 }
 type resUserAttributes struct {
 	DepartmentNm []string `json:"departmentNm" binding:"required"`
@@ -68,9 +72,9 @@ type resUserAttributes struct {
 }
 
 type userCredentilas struct {
-	Type      string `json:"type"`
-	Value     string `json:"value" `
-	Temporary bool   `json:"temporary" `
+	Type      string `json:"type" gorm:"column:credentials_type"`
+	Value     string `json:"value" gorm:"column:credentials_value"`
+	Temporary bool   `json:"temporary" gorm:"column:credentials_temporary"`
 }
 
 // Groups Struct

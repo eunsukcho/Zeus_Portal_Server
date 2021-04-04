@@ -30,6 +30,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		smtpApi.POST("/invitation", h.InvitationUser)
 	}
 	menuApi := r.Group("/api/menu")
+	menuApi.Use(h.DBConnectionCheck)
 	{
 		menuApi.GET("/topmenu", h.GetTopMenuData)
 		menuApi.GET("/submenu", h.SubTopMenuData)
@@ -52,16 +53,23 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		authApi.POST("/auth_list", h.AuthInfoData)
 		authApi.POST("/save_auth", h.SaveAuthData)
 	}
-	userApi := r.Group("/api/user")
-	userApi.Use(rh.UserClientInit)
+	devApi := r.Group("/api/dev")
+	devApi.Use(h.DBConnectionCheck)
 	{
-		userApi.POST("/infoInit", rh.UserClientInit)
-		userApi.POST("/user_list/:id", rh.UserList)
-		userApi.POST("/userListByGroup/:id/members", rh.UserListByGroup)
-		userApi.POST("/register_user", rh.RegisterUser)
-		userApi.POST("/delete_user/:id", rh.DeleteUser)
-		userApi.POST("/update_user", rh.UpdateUser)
-		userApi.POST("/update_userCredentials/:id", rh.UpdateUserCredentials)
+		devApi.POST("/userListByGroupTmp/:id", h.GetDevUser)
+		devApi.POST("/register_user_dev", h.CreateDevUser)
+		devApi.POST("/acceptDev/:id", h.AcceptUser)
+	}
+	adminApi := r.Group("/api/admin")
+	adminApi.Use(rh.UserClientInit)
+	{
+		adminApi.POST("/infoInit", rh.UserClientInit)
+		adminApi.POST("/user_list/:id", rh.UserList)
+		adminApi.POST("/userListByGroup/:id/members", rh.UserListByGroup)
+		adminApi.POST("/register_user", rh.RegisterUser)
+		adminApi.POST("/delete_user/:id", rh.DeleteUser)
+		adminApi.POST("/update_user", rh.UpdateUser)
+		adminApi.POST("/update_userCredentials/:id", rh.UpdateUserCredentials)
 	}
 	groupApi := r.Group("/api/groups")
 	groupApi.Use(rh.GroupClientInit)

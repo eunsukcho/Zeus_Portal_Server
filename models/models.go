@@ -83,3 +83,20 @@ type Envs struct {
 func (Env_setting_Tbls) TableName() string {
 	return "env_setting_tbls"
 }
+
+type Dev_Info struct {
+	Dev_info string `gorm:"column:dev_info" json:"devInfo"`
+	Enabled bool `gorm:"column:enabled" json:"enabled"`
+	GroupName string `gorm:"column:groupname" json:"groupName"`
+	Email string `gorm:"column:email" json:"email"`
+}
+func (Dev_Info) TableName() string {
+	return "devuser_tmp_tbls"
+}
+type Res_Dev_Info struct {
+	Dev_info []string `json:"devInfo"`
+}
+func (resDevInfo *Res_Dev_Info) AddInfo(info string) []string{
+	resDevInfo.Dev_info = append(resDevInfo.Dev_info, info)
+	return resDevInfo.Dev_info
+}
