@@ -2,6 +2,7 @@ package httpd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"zeus/models"
@@ -9,9 +10,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+var errConnFail = errors.New("Connection Failed")
 
 type RequestHandlerInterface interface {
 	//user setting
+	errHandler(err_str string, err error)(bool, string)
 	UserList(c *gin.Context)
 	UserListByGroup(c *gin.Context)
 	RequestUserInfo(id string, c *gin.Context)
@@ -36,7 +39,7 @@ type RequestHandler struct {
 func NewRequestHandler() (RequestHandlerInterface, error) {
 	var authBinding models.Authdetails
 	auth, err := requestLayer.NewAuthInfo(authBinding)
-
+	
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +125,18 @@ func CompareInfo(inputAuth models.Authdetails, initInfo *requestLayer.AuthInfo) 
 	return true, nil
 }
 
+func (h *RequestHandler) errHandler(err_str string, err error) (bool, string){
+	fmt.Println(err_str)
+	var status bool = false;
+	var message string;
+	message = err.Error();
+	if (err == errConnFail) {
+		h.client, _ = requestLayer.GetClient(h.ctx, h.authInfo)
+		message ="Client Connection False";
+	}
+	return status, message
+}
+
 func (h *RequestHandler) UserList(c *gin.Context) {
 
 	/**
@@ -161,11 +176,12 @@ func (h *RequestHandler) UserListByGroup(c *gin.Context) {
 
 	userinfo, err = h.requestH.RequestUserListByGroupApi(h.ctx, uri.Id, h.client)
 	if err != nil {
-		fmt.Println("RequestUserListByGroupApi error 발생")
+		status, err_str := h.errHandler("RequestUserListByGroupApi error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
+		return
 	}
 	for _, value := range userinfo {
 		fmt.Println("userList :", value)
@@ -183,11 +199,12 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 
 		userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
 		if err != nil {
-			fmt.Println("RequestUserListApi error 발생")
+			status, err_str := h.errHandler("RequestUserListApi error 발생", err)
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"status": false,
-				"message": err.Error(),
+				"status": status,
+				"message": err_str,
 			})
+			return
 		}
 		for _, value := range userinfo {
 			fmt.Println("userList :", value)
@@ -203,11 +220,12 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 
 		userinfo, err = h.requestH.RequestOneUserApi(h.ctx, id, h.client)
 		if err != nil {
-			fmt.Println("RequestUserListApi error 발생")
+			status, err_str := h.errHandler("RequestUserListApi error 발생", err)
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"status": false,
-				"message": err.Error(),
+				"status": status,
+				"message": err_str,
 			})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": http.StatusOK,
@@ -222,10 +240,10 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 	fmt.Println("Regi : ", regi)
 	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.client)
 	if err != nil {
-		fmt.Println("request register error 발생")
+		status, err_str := h.errHandler("Request register error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": http.StatusBadRequest,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
 		return
 	}
@@ -248,10 +266,10 @@ func (h *RequestHandler) DeleteUser(c *gin.Context) {
 
 	rst, err := h.requestH.DeleteUserApi(h.ctx, uri.Id, h.client)
 	if err != nil {
-		fmt.Println("request user delete error 발생")
+		status, err_str := h.errHandler("Request user delete error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
 		return
 	}
@@ -264,10 +282,10 @@ func (h *RequestHandler) UpdateUser(c *gin.Context) {
 	regi := c.MustGet("User").(models.RegisterUserInfo)
 	rst, err := h.requestH.UpdateUserApi(h.ctx, regi, h.client)
 	if err != nil {
-		fmt.Println("request register error 발생")
+		status, err_str := h.errHandler("Request user update error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
 		return
 	}
@@ -291,10 +309,10 @@ func (h *RequestHandler) UpdateUserCredentials(c *gin.Context) {
 	rst, err := h.requestH.UpdateUserCredentialsApi(h.ctx, uri.Id, h.client)
 
 	if err != nil {
-		fmt.Println("request user delete error 발생")
+		status, err_str := h.errHandler("Request user update credentials error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
 		return
 	}
@@ -320,11 +338,12 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 
 	groups, err = h.requestH.RequestGroupListApi(h.ctx, uri.Id, h.client)
 	if err != nil {
-		fmt.Println("requestGroups error 발생")
+		status, err_str := h.errHandler("Request group list error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
+		return
 	}
 	for _, value := range groups {
 		fmt.Println(value)
@@ -342,10 +361,10 @@ func (h *RequestHandler) RegisterToken(c *gin.Context) {
 
 	rst, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.client)
 	if err != nil {
-		fmt.Println("request register group add error 발생")
+		status, err_str := h.errHandler("Request group token error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
-			"message": err.Error(),
+			"status": status,
+			"message": err_str,
 		})
 		return
 	}

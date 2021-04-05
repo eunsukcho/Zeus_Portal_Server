@@ -99,7 +99,7 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 	)
 
 	if err != nil || resp.StatusCode != 200 {
-		log.Println("Connection Error")
+		log.Println("Client Connection Error")
 		return nil, errConnFail
 	}
 	defer resp.Body.Close()
@@ -124,7 +124,8 @@ func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId str
 	)
 
 	if err != nil || resp.StatusCode != 200 {
-		log.Println("Connection Error")
+		log.Println("Client Connection Error")
+		
 		return nil, errConnFail
 	}
 	defer resp.Body.Close()
@@ -149,7 +150,7 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client
 	)
 
 	if err != nil || resp.StatusCode != 200 {
-		log.Println("Connection Error")
+		log.Println("Client Connection Error")
 		return models.ResponseUserInfo{}, errConnFail
 	}
 
@@ -214,7 +215,7 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *ht
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "error", err
+		return "error", errConnFail
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	return string(respBody), nil
@@ -248,7 +249,7 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", errConnFail
 	}
 	return string(respBody), nil
 }
@@ -276,7 +277,7 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "error", err
+		return "error", errConnFail
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 
@@ -287,17 +288,17 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, cli
 	log.Printf("[DEBUG] Fetching API Client - User Groups Api")
 	var requesturl string
 	if group == "all" {
-		requesturl = auth.GroupEndpoint + "/?briefRepresentation=false"
+		requesturl = auth.GroupEndpoint + "?briefRepresentation=false"
 	} else {
-		requesturl = auth.GroupEndpoint + "/?search=" + group
+		requesturl = auth.GroupEndpoint + "?search=" + group
 	}
 	fmt.Println("requesturl : ", requesturl)
 	resp, err := client.Get(
 		requesturl,
 	)
 	if err != nil || resp.StatusCode != 200 {
-		log.Println("Connection Error")
-		return nil, err
+		log.Println("Client Connection Error")
+		return nil, errConnFail
 	}
 	defer resp.Body.Close()
 
@@ -335,7 +336,7 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "error", err
+		return "error", errConnFail
 	}
 	defer resp.Body.Close()
 
