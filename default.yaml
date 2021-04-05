@@ -1,6 +1,6 @@
   app:
           db_name:  "zeus"
-          db_port: "32105"
+          db_port: "30036"
           db_host: "192.168.0.214"
           db_username: "postgres"
           db_password: "Jointree!123"

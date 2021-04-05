@@ -287,7 +287,7 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, cli
 	log.Printf("[DEBUG] Fetching API Client - User Groups Api")
 	var requesturl string
 	if group == "all" {
-		requesturl = auth.GroupEndpoint
+		requesturl = auth.GroupEndpoint + "/?briefRepresentation=false"
 	} else {
 		requesturl = auth.GroupEndpoint + "/?search=" + group
 	}
@@ -316,6 +316,7 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 	log.Printf("[DEBUG] Fetching API Client - Register Groups Api")
 
 	fmt.Println("GROUP : ", group)
+	fmt.Println("GROUP UPDATE URL : ", auth.GroupEndpoint+group.Id)
 	ubytes, _ := json.Marshal(group)
 	buff := bytes.NewBuffer(ubytes)
 
