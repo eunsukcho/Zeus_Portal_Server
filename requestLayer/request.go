@@ -285,7 +285,7 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 }
 
 func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, client *http.Client) ([]models.ResGroupInfo, error) {
-	log.Printf("[DEBUG] Fetching API Client - User Groups Api (List)")
+	log.Printf("[DEBUG] Fetching API Client - User Groups Api (List --)")
 	var requesturl string
 	if group == "all" {
 		requesturl = auth.GroupEndpoint + "?briefRepresentation=false"
