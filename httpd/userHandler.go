@@ -130,9 +130,16 @@ func (h *RequestHandler) errHandler(err_str string, err error) (bool, string){
 	var status bool = false;
 	var message string;
 	message = err.Error();
-	if (err == errConnFail) {
+	fmt.Println("Err : ", err)
+	fmt.Println("ErrConnFail : ", errConnFail)
+
+    fmt.Println("Err Error : ", err.Error())
+	if (err.Error() == "Connection Failed") {
+		fmt.Println("err == errConnFail")
 		h.client, _ = requestLayer.GetClient(h.ctx, h.authInfo)
 		message ="Client Connection False";
+	} else {
+		fmt.Println("err != errConnFail")
 	}
 	return status, message
 }
