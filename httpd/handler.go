@@ -1,6 +1,8 @@
 package httpd
 
 import (
+	_"bytes"
+	_"html/template"
 	"log"
 	"fmt"
 	"net/http"
@@ -686,7 +688,7 @@ func (h *Handler) InvitationUser(c *gin.Context) {
 	if(err == nil) {
 		fmt.Println(smtpinfo)
 	}
-	if sendInvitataionEmail(accessAuth, invitationAddress, smtpinfo) != nil {
+	if sendInvitataionEmail(accessAuth, invitationAddress, smtpinfo,) != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"status":http.StatusBadRequest,
 			"message": "Error",
@@ -698,7 +700,7 @@ func (h *Handler) InvitationUser(c *gin.Context) {
 	})
 }
 
-func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo []models.SmtpInfo) error {
+func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo []models.SmtpInfo,) error {
 	port, _ := strconv.Atoi(smtpinfo[0].Port)
 	d := gomail.NewDialer(smtpinfo[0].SmtpAddress, port, smtpinfo[0].AdminAddress, smtpinfo[0].Password)
 	s, err := d.Dial()
