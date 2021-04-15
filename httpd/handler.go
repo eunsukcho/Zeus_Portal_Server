@@ -29,9 +29,12 @@ type HandlerInterface interface {
 	SendMail(c *gin.Context)
 
 	//menu setting
+	GetTopMenuInfoByName(c *gin.Context)
 	GetTopMenuData(c *gin.Context)
 	SubTopMenuData(c *gin.Context)
+	CkDuplicateTopMenu(c *gin.Context)
 	SaveTopMenu(c *gin.Context)
+	CkDuplicateSubMenu(c *gin.Context)
 	SaveSubMenu(c *gin.Context)
 	DeleteTopMenu(c *gin.Context)
 	DeleteSubMenu(c *gin.Context)
@@ -39,6 +42,7 @@ type HandlerInterface interface {
 	SaveUrlLink(c *gin.Context)
 	SaveUrlSubLink(c *gin.Context)
 	DeleteTopMenuUrl(c *gin.Context)
+	DeleteSubMenuByTopCodeUrl(c *gin.Context)
 	DeleteSubMenuUrl(c *gin.Context)
 	GetMenuTargetUrl(c *gin.Context)
 	GetTopMenuTargetUrl(c *gin.Context)
@@ -223,6 +227,28 @@ func (h *Handler) SendMail(c *gin.Context) {
 }
 
 //menu setting
+func (h *Handler) GetTopMenuInfoByName(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"status": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.TopCodeName)
+
+	top_menu, err := h.db.GetTopMenuInfoByName(uri.TopCodeName)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"data":   top_menu,
+	})
+}
 func (h *Handler) GetTopMenuData(c *gin.Context) {
 
 	top_menu, err := h.db.GetAllTopMenu()
@@ -245,6 +271,31 @@ func (h *Handler) SubTopMenuData(c *gin.Context) {
 	fmt.Printf("Found %d products\n", len(sub_menu))
 	c.JSON(http.StatusOK, sub_menu)
 }
+func (h *Handler) CkDuplicateTopMenu(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"status": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.TopCode)
+
+	rst, err := h.db.CkDuplicateTopMenu(uri.TopCode)
+	order, err := h.db.CkDuplicateTopMenuOrder(uri.Order)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"topCodeLen":   rst,
+		"topOrder": order,
+	})
+}
 func (h *Handler) SaveTopMenu(c *gin.Context) {
 	var topMenu models.TopMenuInfo
 	err := c.ShouldBindJSON(&topMenu)
@@ -257,6 +308,8 @@ func (h *Handler) SaveTopMenu(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Printf("topMenu :" , topMenu)
+
 	rst, err := h.db.SaveTopMenuInfo(topMenu)
 
 	if err != nil {
@@ -269,6 +322,32 @@ func (h *Handler) SaveTopMenu(c *gin.Context) {
 		"data":   rst,
 	})
 }
+
+func (h *Handler) CkDuplicateSubMenu(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"status": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("CkDuplicateSubMenu uri : ", uri)
+
+	rst, err := h.db.CkDuplicateSubMenu(uri.TopCode, uri.SubCode)
+	order, err := h.db.CkDuplicateSubMenuOrder(uri.TopCode, uri.SubCode, uri.Order)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"subCodeLen":   rst,
+		"subOrder": order,
+	})
+}
+
 func (h *Handler) SaveSubMenu(c *gin.Context) {
 	var subMenu models.SubMenuInfo
 
@@ -421,6 +500,30 @@ func (h *Handler) DeleteTopMenuUrl(c *gin.Context) {
 	}
 
 	rst, err := h.db.DeleteTopMenuUrl(topMenu)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
+}
+
+func (h *Handler) DeleteSubMenuByTopCodeUrl(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"status": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("CkDuplicateSubMenu uri : ", uri)
+
+	rst, err := h.db.DeleteSubMenuByTopCodeUrl(uri.TopCodeName)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -44,14 +44,37 @@ func (db *DBORM) UpdateEnvData(envs models.Env_setting_Tbls) (envInfo models.Env
 }
 
 // menu setting
+func (db *DBORM) GetTopMenuInfoByName(topCodeName string) (top models.TopMenuInfo, err error) {
+	return top, db.Where("top_menu_name = ? ", topCodeName).Find(&top).Error
+}
 func (db *DBORM) GetAllTopMenu() (top []models.TopMenuInfo, err error) {
 	return top, db.Order("top_menu_order asc").Find(&top).Error
 }
 func (db *DBORM) GetAllSubMenu() (sub []models.SubMenuInfo, err error) {
 	return sub, db.Order("sub_menu_order asc").Find(&sub).Error
 }
+func (db *DBORM) CkDuplicateTopMenu(topcode string) (rst int, err error) {
+	var top models.TopMenuInfo
+	var cnt int
+	return cnt, db.Model(&top).Where("top_menu_code = ? ", topcode).Count(&cnt).Error
+}
+func (db *DBORM) CkDuplicateTopMenuOrder(order int) (rst int, err error) {
+	var top models.TopMenuInfo
+	var cnt int
+	return cnt, db.Model(&top).Where("top_menu_order = ? ", order).Count(&cnt).Error
+}
 func (db *DBORM) SaveTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error) {
 	return top, db.Create(&top).Error
+}
+func (db *DBORM) CkDuplicateSubMenu(topcode string, subcode string) (rst int, err error) {
+	var sub models.SubMenuInfo
+	var cnt int
+	return cnt, db.Model(&sub).Where("sub_menu_code = ? and top_menu_code = ?", subcode, topcode).Count(&cnt).Error
+}
+func (db *DBORM) CkDuplicateSubMenuOrder(topcode string, subcode string, order int) (rst int, err error) {
+	var sub models.SubMenuInfo
+	var cnt int
+	return cnt, db.Model(&sub).Where("top_menu_code = ? and sub_menu_order = ? ", topcode, order).Count(&cnt).Error
 }
 func (db *DBORM) SaveSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
 	return sub, db.Create(&sub).Error
@@ -59,6 +82,11 @@ func (db *DBORM) SaveSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, er
 func (db *DBORM) DeleteTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error) {
 	return top, db.Where("top_menu_code = ? ", top.Top_Menu_Code).Unscoped().Delete(&top).Error
 }
+func (db *DBORM) DeleteSubMenuByTopCodeUrl(top string) (models.SubMenuInfo, error) {
+	var sub models.SubMenuInfo
+	return sub, db.Model(&sub).Where("top_menu_code=?", top).Unscoped().Delete(&sub).Error
+}
+
 func (db *DBORM) DeleteSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
 	return sub, db.Where("sub_menu_code = ? and top_menu_code=?", sub.Sub_Menu_Code, sub.Top_Menu_Code).Unscoped().Delete(&sub).Error
 }

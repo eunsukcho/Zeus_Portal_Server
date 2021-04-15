@@ -24,7 +24,11 @@ type GroupAdminAPIInfo struct {
 
 // Binding Uri
 type Uri struct {
-	Id string `uri:"id" binding:"required"`
+	Id string `uri:"id"`
+	TopCode string `uri:"topCode"`
+	SubCode string `uri:"subCode"`
+	Order int `uri:"order"`
+	TopCodeName string `uri:"topCodeName"`	
 }
 
 // User Struct

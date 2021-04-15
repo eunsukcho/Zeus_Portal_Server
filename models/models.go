@@ -36,7 +36,7 @@ type TopMenuInfo struct {
 }
 
 func (TopMenuInfo) TableName() string {
-	return "top_menu_tbl_test"
+	return "top_menu_tbl"
 }
 
 type SubMenuInfo struct {
@@ -52,7 +52,7 @@ type SubMenuInfo struct {
 }
 
 func (SubMenuInfo) TableName() string {
-	return "sub_menu_tbl_test"
+	return "sub_menu_tbl"
 }
 
 type TopMenuIcon struct {

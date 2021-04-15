@@ -8,11 +8,17 @@ type DBLayer interface {
 	UpdateEnvData(models.Env_setting_Tbls) (models.Env_setting_Tbls, error)
 
 	// menu setting
+	GetTopMenuInfoByName(string) (models.TopMenuInfo, error)
 	GetAllTopMenu() ([]models.TopMenuInfo, error)
 	GetAllSubMenu() ([]models.SubMenuInfo, error)
+	CkDuplicateTopMenu(string) (int, error)
+	CkDuplicateTopMenuOrder(order int) (rst int, err error)
 	SaveTopMenuInfo(models.TopMenuInfo) (models.TopMenuInfo, error)
+	CkDuplicateSubMenu(string, string) (int, error)
+	CkDuplicateSubMenuOrder(string, string, int) (rst int, err error)
 	SaveSubMenuInfo(models.SubMenuInfo) (models.SubMenuInfo, error)
 	DeleteTopMenuInfo(models.TopMenuInfo) (models.TopMenuInfo, error)
+	DeleteSubMenuByTopCodeUrl(string) (models.SubMenuInfo, error)
 	DeleteSubMenuInfo(models.SubMenuInfo) (models.SubMenuInfo, error)
 	GetAllIcon() ([]models.TopMenuIcon, error)
 	SaveUrlLink(models.TopMenuInfo) (models.TopMenuInfo, error)
@@ -23,7 +29,7 @@ type DBLayer interface {
 	GetTopMenuTargetUrl(models.TopMenuInfo) (models.TopMenuInfo, error)
 	UpdateTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error)
 	UpdateSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error)
-
+	
 	//smtp setting
 	SmtpInfoConnectionCheck() ([]models.SmtpInfo, error)
 	SmtpInfoSave(models.SmtpInfo) (models.SmtpInfo, error)
