@@ -29,6 +29,7 @@ type Uri struct {
 	SubCode string `uri:"subCode"`
 	Order int `uri:"order"`
 	TopCodeName string `uri:"topCodeName"`	
+	
 }
 
 // User Struct
