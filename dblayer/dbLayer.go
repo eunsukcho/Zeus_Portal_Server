@@ -29,7 +29,8 @@ type DBLayer interface {
 	GetTopMenuTargetUrl(models.TopMenuInfo) (models.TopMenuInfo, error)
 	UpdateTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, error)
 	UpdateSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error)
-	
+	UpdateSubMenuTopCodeName(string, string) (models.SubMenuInfo, error)
+
 	//smtp setting
 	SmtpInfoConnectionCheck() ([]models.SmtpInfo, error)
 	SmtpInfoSave(models.SmtpInfo) (models.SmtpInfo, error)

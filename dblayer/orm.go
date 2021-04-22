@@ -1,9 +1,9 @@
 package dblayer
 
 import (
+	"encoding/json"
 	"fmt"
 	"zeus/models"
-	"encoding/json"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -117,6 +117,9 @@ func (db *DBORM) UpdateTopMenuInfo(top models.TopMenuInfo) (models.TopMenuInfo, 
 func (db *DBORM) UpdateSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
 	return sub, db.Model(&sub).Where("sub_menu_code=?", sub.Sub_Menu_Code).Update(models.SubMenuInfo{Sub_Menu_Name: sub.Sub_Menu_Name, Sub_Menu_Order: sub.Sub_Menu_Order, Top_Menu_Code: sub.Top_Menu_Code, Top_Menu_Name: sub.Top_Menu_Name, Icon_Code: sub.Icon_Code}).Error
 }
+func (db *DBORM) UpdateSubMenuTopCodeName(topCode string, topName string) (sub models.SubMenuInfo, err error) {
+	return sub, db.Model(&sub).Where("top_menu_code=?", topCode).Update(models.SubMenuInfo{Top_Menu_Name: topName}).Error
+}
 
 //smtp setting
 func (db *DBORM) SmtpInfoConnectionCheck() ([]models.SmtpInfo, error) {
@@ -154,23 +157,23 @@ func (db *DBORM) GetDevUserInfo(group string) ([]models.RegisterUserInfo, error)
 	var tmp []models.Dev_Info
 	var devInfo []models.RegisterUserInfo
 	err := db.Where("groupname=? and enabled=?", group, false).Find(&tmp).Error
-	if(err != nil) {
+	if err != nil {
 		panic(err)
 	}
 
 	for _, info := range tmp {
 		var registerInfo = models.RegisterUserInfo{}
 		err := json.Unmarshal([]byte(info.Dev_info), &registerInfo)
-		if(err != nil) {
+		if err != nil {
 			fmt.Println(err)
 		}
 		devInfo = append(devInfo, registerInfo)
 	}
-	
-	fmt.Println("devInfo : " , devInfo)
+
+	fmt.Println("devInfo : ", devInfo)
 	return devInfo, nil
 }
 func (db *DBORM) AcceptUpdateUser(user string) (dev models.Dev_Info, err error) {
-	
+
 	return dev, db.Model(&dev).Where("email = ?", user).Update(models.Dev_Info{Enabled: true}).Error
 }

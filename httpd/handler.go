@@ -1,22 +1,22 @@
 package httpd
 
 import (
-	_"bytes"
-	_"html/template"
-	"log"
+	_ "bytes"
 	"fmt"
+	_ "html/template"
+	"log"
 	"net/http"
 	"strconv"
 	"zeus/dblayer"
 	"zeus/models"
 
 	"github.com/gin-gonic/gin"
-	_"golang.org/x/crypto/bcrypt"
+	_ "golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 )
 
 type HandlerInterface interface {
-	DBConnectionCheck (c *gin.Context)
+	DBConnectionCheck(c *gin.Context)
 
 	//env setting
 	GetEnvData(c *gin.Context)
@@ -48,6 +48,7 @@ type HandlerInterface interface {
 	GetTopMenuTargetUrl(c *gin.Context)
 	UpdateTopMenuInfo(c *gin.Context)
 	UpdateSubMenuInfo(c *gin.Context)
+	UpdateSubMenuTopCodeName(c *gin.Context)
 
 	//auth setting
 	AuthInfoData(c *gin.Context)
@@ -187,7 +188,7 @@ func (h *Handler) SmtpSave(c *gin.Context) {
 }
 
 func (h *Handler) SmtpGet(c *gin.Context) {
-	
+
 	smtpinfo, err := h.db.SmtpInfoGet()
 
 	if err != nil {
@@ -199,7 +200,7 @@ func (h *Handler) SmtpGet(c *gin.Context) {
 }
 
 func (h *Handler) SendMail(c *gin.Context) {
-	
+
 	var smtpinfo models.SmtpInfo
 	c.BindJSON(&smtpinfo)
 	password := smtpinfo.Password
@@ -231,7 +232,7 @@ func (h *Handler) GetTopMenuInfoByName(c *gin.Context) {
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": err.Error(),
 		})
 		return
@@ -275,7 +276,7 @@ func (h *Handler) CkDuplicateTopMenu(c *gin.Context) {
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": err.Error(),
 		})
 		return
@@ -291,9 +292,9 @@ func (h *Handler) CkDuplicateTopMenu(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": http.StatusOK,
-		"topCodeLen":   rst,
-		"topOrder": order,
+		"status":     http.StatusOK,
+		"topCodeLen": rst,
+		"topOrder":   order,
 	})
 }
 func (h *Handler) SaveTopMenu(c *gin.Context) {
@@ -308,7 +309,7 @@ func (h *Handler) SaveTopMenu(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("topMenu :" , topMenu)
+	fmt.Printf("topMenu :", topMenu)
 
 	rst, err := h.db.SaveTopMenuInfo(topMenu)
 
@@ -327,7 +328,7 @@ func (h *Handler) CkDuplicateSubMenu(c *gin.Context) {
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": err.Error(),
 		})
 		return
@@ -342,9 +343,9 @@ func (h *Handler) CkDuplicateSubMenu(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status": http.StatusOK,
-		"subCodeLen":   rst,
-		"subOrder": order,
+		"status":     http.StatusOK,
+		"subCodeLen": rst,
+		"subOrder":   order,
 	})
 }
 
@@ -432,7 +433,7 @@ func (h *Handler) GetIcon(c *gin.Context) {
 }
 
 func (h *Handler) SaveUrlLink(c *gin.Context) {
-	
+
 	var topMenu models.TopMenuInfo
 	err := c.ShouldBindJSON(&topMenu)
 
@@ -516,7 +517,7 @@ func (h *Handler) DeleteSubMenuByTopCodeUrl(c *gin.Context) {
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": err.Error(),
 		})
 		return
@@ -671,6 +672,30 @@ func (h *Handler) UpdateSubMenuInfo(c *gin.Context) {
 	})
 }
 
+func (h *Handler) UpdateSubMenuTopCodeName(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"status":  false,
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("UpdateSubMenuTopCodeName uri : ", uri)
+	rst, err := h.db.UpdateSubMenuTopCodeName(uri.TopCode, uri.TopCodeName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"data":   rst,
+	})
+}
+
 func (h *Handler) AuthInfoData(c *gin.Context) {
 	auth_detail_tbls, err := h.db.GetAllAuthData()
 
@@ -771,8 +796,8 @@ func (h *Handler) AcceptUser(c *gin.Context) {
 	}
 	fmt.Printf("Found %d products\n", accept_dev)
 	c.JSON(http.StatusOK, gin.H{
-		"status":http.StatusOK,
-		"message":"success",
+		"status":  http.StatusOK,
+		"message": "success",
 	})
 }
 
@@ -785,35 +810,35 @@ func (h *Handler) InvitationUser(c *gin.Context) {
 	invitationAddress := inviteInfo.InvitationAddress
 
 	fmt.Println(accessAuth, invitationAddress)
-	
+
 	var smtpinfo []models.SmtpInfo
 	smtpinfo, err = h.db.SmtpInfoGet()
-	if(err == nil) {
+	if err == nil {
 		fmt.Println(smtpinfo)
 	}
-	if sendInvitataionEmail(accessAuth, invitationAddress, smtpinfo,) != nil {
+	if sendInvitataionEmail(accessAuth, invitationAddress, smtpinfo) != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status":http.StatusBadRequest,
+			"status":  http.StatusBadRequest,
 			"message": "Error",
 		})
-		return 
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status":http.StatusOK,
+		"status": http.StatusOK,
 	})
 }
 
-func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo []models.SmtpInfo,) error {
+func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo []models.SmtpInfo) error {
 	port, _ := strconv.Atoi(smtpinfo[0].Port)
 	d := gomail.NewDialer(smtpinfo[0].SmtpAddress, port, smtpinfo[0].AdminAddress, smtpinfo[0].Password)
 	s, err := d.Dial()
 	if err != nil {
 		log.Println(err.Error(), smtpinfo)
 		return err
-	} 
+	}
 
-	userRegisterLink := "http://192.168.0.102:4201/user/invitation/"+accessAuth+"/"+invitationAddress
-	
+	userRegisterLink := "http://192.168.0.102:4201/user/invitation/" + accessAuth + "/" + invitationAddress
+
 	fmt.Println("SMTP Info : ", smtpinfo)
 	m := gomail.NewMessage()
 	m.SetHeader("From", smtpinfo[0].AdminAddress)
@@ -828,4 +853,3 @@ func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo 
 	m.Reset()
 	return nil
 }
-

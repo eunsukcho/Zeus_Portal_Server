@@ -51,6 +51,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		menuApi.POST("/toptarget", h.GetTopMenuTargetUrl)
 		menuApi.POST("/topmenuupdate", h.UpdateTopMenuInfo)
 		menuApi.POST("/submenuupdate", h.UpdateSubMenuInfo)
+		menuApi.POST("/updateSubMenuInfoByTopMenuCode/:topCode/:topCodeName", h.UpdateSubMenuTopCodeName)
 	}
 	authApi := r.Group("/api/auth")
 	{
@@ -81,7 +82,6 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		groupApi.POST("/lt/:id", rh.GroupsList)
 		groupApi.POST("/putKey", rh.RegisterToken)
 	}
-
 
 	return r.Run(address)
 }
