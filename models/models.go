@@ -7,7 +7,7 @@ import (
 )
 
 type Invitation struct {
-	AccessAuth		 string `json:"AccessAuth"`
+	AccessAuth        string `json:"AccessAuth"`
 	InvitationAddress string `json:"InvitationAddress"`
 }
 type SmtpInfo struct {
@@ -66,18 +66,18 @@ func (TopMenuIcon) TableName() string {
 }
 
 type Env_setting_Tbls struct {
-	ThemeSettingVal string `gorm:"column:theme_setting_val" binding:"required" json:"themeSettingVal"`
-	LangSettingVal  string `gorm:"column:lang_setting_val" binding:"required" json:"langSettingVal"`
-	AutoLogoutVal   bool `gorm:"type:boolean; column:auto_logout_val" binding:"required" json:"autoLogoutVal"`
-	PortalVersion   int    `gorm:"column:portal_version" binding:"required" json:"portalVersion"`
-	UserRegisterAuth bool `gorm:"type:boolean; column:user_register_auth" binding:"required" json:"userRegisterAuth"`
+	ThemeSettingVal  string `gorm:"column:theme_setting_val" binding:"required" json:"themeSettingVal"`
+	LangSettingVal   string `gorm:"column:lang_setting_val" binding:"required" json:"langSettingVal"`
+	AutoLogoutVal    bool   `gorm:"type:boolean; column:auto_logout_val" binding:"required" json:"autoLogoutVal"`
+	PortalVersion    int    `gorm:"column:portal_version" binding:"required" json:"portalVersion"`
+	UserRegisterAuth bool   `gorm:"type:boolean; column:user_register_auth" binding:"required" json:"userRegisterAuth"`
 }
 type Envs struct {
-	ThemeSettingVal string `binding:"required" json:"themeSettingVal"`
-	LangSettingVal  string `binding:"required" json:"langSettingVal"`
-	AutoLogoutVal   bool `binding:"required" json:"autoLogoutVal"`
-	PortalVersion   int    `binding:"required" json:"zoneVersionportalVersion"`
-	UserRegisterAuth bool `binding:"required" json:"userRegisterAuth"`
+	ThemeSettingVal  string `binding:"required" json:"themeSettingVal"`
+	LangSettingVal   string `binding:"required" json:"langSettingVal"`
+	AutoLogoutVal    bool   `binding:"required" json:"autoLogoutVal"`
+	PortalVersion    int    `binding:"required" json:"zoneVersionportalVersion"`
+	UserRegisterAuth bool   `binding:"required" json:"userRegisterAuth"`
 }
 
 func (Env_setting_Tbls) TableName() string {
@@ -85,18 +85,30 @@ func (Env_setting_Tbls) TableName() string {
 }
 
 type Dev_Info struct {
-	Dev_info string `gorm:"column:dev_info" json:"devInfo"`
-	Enabled bool `gorm:"column:enabled" json:"enabled"`
+	Dev_info  string `gorm:"column:dev_info" json:"devInfo"`
+	Enabled   bool   `gorm:"column:enabled" json:"enabled"`
 	GroupName string `gorm:"column:groupname" json:"groupName"`
-	Email string `gorm:"column:email" json:"email"`
+	Email     string `gorm:"column:email" json:"email"`
 }
+
 func (Dev_Info) TableName() string {
 	return "devuser_tmp_tbls"
 }
+
 type Res_Dev_Info struct {
 	Dev_info []string `json:"devInfo"`
 }
-func (resDevInfo *Res_Dev_Info) AddInfo(info string) []string{
+
+func (resDevInfo *Res_Dev_Info) AddInfo(info string) []string {
 	resDevInfo.Dev_info = append(resDevInfo.Dev_info, info)
 	return resDevInfo.Dev_info
+}
+
+type LogType_Code struct {
+	LogType     string `gorm:"column:logtype" json:"logType"`
+	LogTypeName string `gorm:"column:logtype_nm" json:"logTypeNm"`
+}
+
+func (LogType_Code) TableName() string {
+	return "log_code_tbl"
 }

@@ -1,47 +1,6 @@
 package dblayer
 
-import (
-	"encoding/json"
-	"fmt"
-	"zeus/models"
-
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-)
-
-type DBORM struct {
-	*gorm.DB
-}
-
-func NewDBInit() (*DBORM, error) {
-	dbConfig := settingDB()
-
-	postgres_conn_name := fmt.Sprintf("host=%v port=%v user=%v dbname=%v password=%v sslmode=disable",
-		dbConfig.db_host, dbConfig.db_port, dbConfig.db_username, dbConfig.db_name, dbConfig.db_password)
-	fmt.Println("conname \n", postgres_conn_name)
-
-	db, err := gorm.Open("postgres", postgres_conn_name)
-
-	return &DBORM{
-		DB: db,
-	}, err
-}
-
-// init zeus env
-func (db *DBORM) GetAllEnvData() (envs []models.Env_setting_Tbls, err error) {
-
-	return envs, db.Find(&envs).Error
-}
-func (db *DBORM) UpdateEnvData(envs models.Env_setting_Tbls) (envInfo models.Env_setting_Tbls, err error) {
-
-	theme := envs.ThemeSettingVal
-	lang := envs.LangSettingVal
-	autoLogout := envs.AutoLogoutVal
-	version := envs.PortalVersion
-	userAuth := envs.UserRegisterAuth
-
-	return envInfo, db.Model(&envInfo).Updates(map[string]interface{}{"ThemeSettingVal": theme, "LangSettingVal": lang, "AutoLogoutVal": autoLogout, "PortalVersion": version, "UserRegisterAuth": userAuth}).Error
-}
+import "zeus/models"
 
 // menu setting
 func (db *DBORM) GetTopMenuInfoByName(topCodeName string) (top models.TopMenuInfo, err error) {
@@ -119,61 +78,4 @@ func (db *DBORM) UpdateSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, 
 }
 func (db *DBORM) UpdateSubMenuTopCodeName(topCode string, topName string) (sub models.SubMenuInfo, err error) {
 	return sub, db.Model(&sub).Where("top_menu_code=?", topCode).Update(models.SubMenuInfo{Top_Menu_Name: topName}).Error
-}
-
-//smtp setting
-func (db *DBORM) SmtpInfoConnectionCheck() ([]models.SmtpInfo, error) {
-	return nil, nil
-}
-func (db *DBORM) SmtpInfoSave(smtpinfo models.SmtpInfo) (models.SmtpInfo, error) {
-	return smtpinfo, db.Model(&smtpinfo).Update(&smtpinfo).Error
-}
-func (db *DBORM) SmtpInfoTest() ([]models.SmtpInfo, error) {
-	return nil, nil
-}
-func (db *DBORM) SmtpInfoGet() (smtpinfo []models.SmtpInfo, err error) {
-	return smtpinfo, db.Find(&smtpinfo).Error
-}
-
-func (db *DBORM) GetAllAuthData() (auth []models.Authdetails, err error) {
-
-	return auth, db.Find(&auth).Error
-}
-func (db *DBORM) SaveAuthData(authBinding models.Authdetails) (auth []models.Authdetails, err error) {
-	err = db.Create(&authBinding).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return auth, db.Find(&auth).Error
-}
-
-func (db *DBORM) SaveDevUserInfo(devinfo models.Dev_Info) (models.Dev_Info, error) {
-
-	return devinfo, db.Create(&devinfo).Error
-}
-
-func (db *DBORM) GetDevUserInfo(group string) ([]models.RegisterUserInfo, error) {
-	var tmp []models.Dev_Info
-	var devInfo []models.RegisterUserInfo
-	err := db.Where("groupname=? and enabled=?", group, false).Find(&tmp).Error
-	if err != nil {
-		panic(err)
-	}
-
-	for _, info := range tmp {
-		var registerInfo = models.RegisterUserInfo{}
-		err := json.Unmarshal([]byte(info.Dev_info), &registerInfo)
-		if err != nil {
-			fmt.Println(err)
-		}
-		devInfo = append(devInfo, registerInfo)
-	}
-
-	fmt.Println("devInfo : ", devInfo)
-	return devInfo, nil
-}
-func (db *DBORM) AcceptUpdateUser(user string) (dev models.Dev_Info, err error) {
-
-	return dev, db.Model(&dev).Where("email = ?", user).Update(models.Dev_Info{Enabled: true}).Error
 }

@@ -5,11 +5,16 @@ import (
 )
 
 func RunAPI(address string) error {
-	h, err := NewHandler()
+	h, err := NewHandlerWithParams()
+	if err != nil {
+		return err
+	}
+
 	rh, err := NewRequestHandler()
 	if err != nil {
 		return err
 	}
+
 	return RunAPIWithHandler(address, h, rh)
 }
 
@@ -83,5 +88,10 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		groupApi.POST("/putKey", rh.RegisterToken)
 	}
 
+	druidApi := r.Group("/api/druid")
+	{
+		druidApi.GET("/", h.GetColumnSearchInfo)
+		druidApi.POST("/val", h.GetLogValue)
+	}
 	return r.Run(address)
 }
