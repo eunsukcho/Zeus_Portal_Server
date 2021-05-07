@@ -22,16 +22,6 @@ type GroupAdminAPIInfo struct {
 	Admin  Authdetails `binding:"required" json:"admin"`
 }
 
-// Binding Uri
-type Uri struct {
-	Id string `uri:"id"`
-	TopCode string `uri:"topCode"`
-	SubCode string `uri:"subCode"`
-	Order int `uri:"order"`
-	TopCodeName string `uri:"topCodeName"`	
-	
-}
-
 // User Struct
 type UserListData struct {
 	Id    string      `json:"id"`
@@ -61,7 +51,7 @@ type UserInfo struct {
 	Username  string `json:"username" gorm:"column:username"`
 	FirstName string `json:"firstName" gorm:"column:firstname"`
 	LastName  string ` json:"lastName" gorm:"column:lastname"`
-	Enabled   bool `json:"enabled" gorm:"column:enabled"`
+	Enabled   bool   `json:"enabled" gorm:"column:enabled"`
 	Email     string `json:"email" gorm:"column:email"`
 }
 

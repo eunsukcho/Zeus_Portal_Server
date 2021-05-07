@@ -112,3 +112,13 @@ type LogType_Code struct {
 func (LogType_Code) TableName() string {
 	return "log_code_tbl"
 }
+
+// Binding Uri
+type Uri struct {
+	Id          string `uri:"id"`
+	TopCode     string `uri:"topCode"`
+	SubCode     string `uri:"subCode"`
+	Order       int    `uri:"order"`
+	TopCodeName string `uri:"topCodeName"`
+	Table       string `uri:"table"`
+}

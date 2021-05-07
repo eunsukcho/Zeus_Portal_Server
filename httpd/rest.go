@@ -90,7 +90,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 
 	druidApi := r.Group("/api/druid")
 	{
-		druidApi.GET("/", h.GetColumnSearchInfo)
+		druidApi.GET("/:table", h.GetColumnSearchInfo)
 		druidApi.POST("/val", h.GetLogValue)
 	}
 	return r.Run(address)

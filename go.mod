@@ -3,6 +3,7 @@ module zeus
 go 1.15
 
 require (
+	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/jinzhu/gorm v1.9.16

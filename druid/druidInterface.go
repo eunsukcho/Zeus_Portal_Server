@@ -3,13 +3,14 @@ package druid
 import (
 	"fmt"
 	"os"
+	"zeus/models"
 
 	"github.com/spf13/viper"
 )
 
 type DruidInterface interface {
-	GetColumnValue(string, string, chan string, chan []map[string]string) ([]map[string]string, error)
-	GetLogValue(map[string]string, string) (interface{}, error)
+	GetColumnValue(string, string, string, chan string, chan []map[string]string) ([]map[string]string, error)
+	GetLogValue(models.LogSearchObj, string, string) (interface{}, error)
 }
 
 type ClientInfo struct {

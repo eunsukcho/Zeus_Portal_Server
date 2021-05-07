@@ -8,40 +8,10 @@ import (
 	"net/http"
 	"reflect"
 	"time"
+	"zeus/models"
 )
 
-func ConvertColumnNameAs(column string) (returnAs string) {
-	switch column {
-	case "kubernetes.host":
-		returnAs = "hostname"
-	case "kubernetes.namespace_name":
-		returnAs = "namespace"
-	case "kubernetes.pod_name":
-		returnAs = "podname"
-	case "kubernetes.container_name":
-		returnAs = "container_id"
-	}
-	return returnAs
-}
-func ConvertValueName(column string) (returnAs string) {
-	switch column {
-	case "hostname":
-		returnAs = "kubernetes.host"
-	case "namespace":
-		returnAs = "kubernetes.namespace_name"
-	case "podname":
-		returnAs = "kubernetes.pod_name"
-	case "container_id":
-		returnAs = "kubernetes.container_name"
-	case "startDt":
-		returnAs = `\"__time\" > TIMESTAMP `
-	case "endDt":
-		returnAs = `\"__time\" <= TIMESTAMP `
-	}
-	return returnAs
-}
-
-func (urlInfo *ClientInfo) GetColumnValue(column string, table string, key chan string, c chan []map[string]string) (returnColumn []map[string]string, error error) {
+func (urlInfo *ClientInfo) GetColumnValue(column string, table string, tableDiv string, key chan string, c chan []map[string]string) (returnColumn []map[string]string, error error) {
 
 	url := urlInfo.Host + ":" + urlInfo.Port + urlInfo.Endpoint
 
@@ -73,45 +43,92 @@ func (urlInfo *ClientInfo) GetColumnValue(column string, table string, key chan 
 	return nil, nil
 }
 
-func (urlInfo *ClientInfo) GetLogValue(where map[string]string, table string) (rst interface{}, error error) {
-	url := urlInfo.Host + ":" + urlInfo.Port + urlInfo.Endpoint
+func metaData(anything interface{}, tableDiv string) string {
 
 	var whereQuery bytes.Buffer
-	whereQuery.WriteString(` WHERE \"hostname\" IS NOT NULL`)
+	if tableDiv == "container" {
+		whereQuery.WriteString(` WHERE \"hostname\" IS NOT NULL`)
+	}
+	if tableDiv == "syslog" {
+		whereQuery.WriteString(` WHERE \"host\" IS NOT NULL`)
+	}
 
-	keys := reflect.ValueOf(where).MapKeys()
-	for _, key := range keys {
-		convertKey := ConvertValueName(key.String())
-		value := where[key.String()]
+	target := reflect.ValueOf(anything)
+	elements := target.Elem()
 
-		if value != "" && (key.String() != "startDt" || key.String() != "endDt") {
-			if key.String() == "startDt" || key.String() == "endDt" {
-				fmt.Println("Date Column")
+	fmt.Printf("Type: %s\n", target.Type())
+
+	for i := 0; i < elements.NumField(); i++ {
+		mValue := elements.Field(i)
+		mType := elements.Type().Field(i)
+		tag := mType.Tag
+
+		if mType.Name == "Table" {
+			continue
+		}
+
+		value := fmt.Sprintf("%v", mValue.Interface())
+		if value != "" {
+			if mType.Name == "DateArr" {
+				dateMap := mValue.Interface().([]map[string]string)
+
+				startDt := dateMap[0]["startDt"]
+				endDt := dateMap[1]["endDt"]
+
+				if startDt != "" && endDt != "" {
+					whereQuery.WriteString(` AND \"__time\" BETWEEN TIMESTAMP '`)
+					whereQuery.WriteString(startDt)
+					whereQuery.WriteString("' AND TIMESTAMP '")
+					whereQuery.WriteString(endDt)
+					whereQuery.WriteString("'")
+				}
+				continue
+			}
+			if mType.Name == "Log" || mType.Name == "Process" || mType.Name == "Message" {
 				whereQuery.WriteString(` AND `)
-				whereQuery.WriteString(convertKey)
-				whereQuery.WriteString("'")
+				whereQuery.WriteString(`\"`)
+				whereQuery.WriteString(tag.Get("json"))
+				whereQuery.WriteString(`\"`)
+				whereQuery.WriteString(` LIKE `)
+				whereQuery.WriteString("'%")
 				whereQuery.WriteString(value)
-				whereQuery.WriteString("'")
+				whereQuery.WriteString("%'")
 				continue
 			}
 			whereQuery.WriteString(` AND `)
 			whereQuery.WriteString(`\"`)
-			whereQuery.WriteString(key.String())
+			whereQuery.WriteString(tag.Get("json"))
 			whereQuery.WriteString(`\"`)
 			whereQuery.WriteString(`=`)
 			whereQuery.WriteString("'")
 			whereQuery.WriteString(value)
 			whereQuery.WriteString("'")
+
 		}
 	}
+	return whereQuery.String()
+}
+
+func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, tableDiv string) (rst interface{}, error error) {
+	url := urlInfo.Host + ":" + urlInfo.Port + urlInfo.Endpoint
+
+	whereQuery := metaData(&where, tableDiv)
+	fmt.Println(whereQuery)
+
 	var query bytes.Buffer
-	str := `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace_name\", \"pod_name\", \"loglevel\", \"log\" AS logMessage `
+	var str string
+	if tableDiv == "container" {
+		str = `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace_name\", \"pod_name\", \"loglevel\", \"log\" AS logMessage `
+	}
+	if tableDiv == "syslog" {
+		str = `SELECT \"__time\" AS collectDt, \"host\", \"loglevel\", \"message\" AS logMessage , \"process\"`
+	}
+
 	query.WriteString(str)
 	query.WriteString(`FROM \"`)
 	query.WriteString(table)
 	query.WriteString(`\" `)
-	query.WriteString(whereQuery.String())
-	query.WriteString(` LIMIT 100`)
+	query.WriteString(whereQuery)
 
 	reqTxt := `{"query" : "` + query.String() + `"}`
 	fmt.Println("Request JSON : ", reqTxt)
@@ -125,11 +142,9 @@ func (urlInfo *ClientInfo) GetLogValue(where map[string]string, table string) (r
 			fmt.Println(error)
 			return nil, error
 		}
-
 		return m, nil
 	}
 	return nil, nil
-
 }
 
 func HTTPDruid(url string, sqlJson *bytes.Buffer) (respBody []byte, err error) {
