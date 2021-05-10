@@ -129,7 +129,7 @@ func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, 
 	var query bytes.Buffer
 	var str string
 	if tableDiv == "container" {
-		str = `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace_name\", \"pod_name\", \"loglevel\", \"log\" AS logMessage `
+		str = `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace\", \"pod_name\", \"loglevel\", \"log\" AS logMessage `
 	}
 	if tableDiv == "syslog" {
 		str = `SELECT \"__time\" AS collectDt, \"host\", \"loglevel\", \"message\" AS logMessage , \"process\"`

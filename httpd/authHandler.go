@@ -121,7 +121,7 @@ func (h *Handler) AcceptUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Printf("Found %d products\n", accept_dev)
+	fmt.Println("Found %d products", accept_dev)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  http.StatusOK,
 		"message": "success",

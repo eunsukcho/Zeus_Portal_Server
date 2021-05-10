@@ -26,7 +26,7 @@ func (h *Handler) GetColumnSearchInfo(c *gin.Context) {
 	var columns []string
 	if uri.Table == "container" {
 		tableNm = "processed-containerlog"
-		columns = append(columns, "hostname", "namespace_name", "pod_name", "container_name")
+		columns = append(columns, "hostname", "namespace", "pod_name", "container_name")
 	}
 	if uri.Table == "syslog" {
 		tableNm = "processed-syslog"

@@ -5,7 +5,7 @@ type LogSearchObj struct {
 	Container_name string `json:"container_name"`
 	Log_Level      string `json:"loglevel"`
 	Hostname       string `json:"hostname"`
-	Namespace_name string `json:"namespace_name"`
+	Namespace      string `json:"namespace"`
 	Pod_name       string `json:"pod_name"`
 	Log            string `json:"log"`
 	/*StartDt        string              `json:"startDt"`
