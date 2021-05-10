@@ -56,13 +56,18 @@ func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, boo
 	return nil, true, nil
 }
 
-func GetClient(ctx context.Context, token *oauth2.Token) (*http.Client, error) {
+func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 
-	fmt.Println("GetClient")
+	token, err := auth.GetApiClientTokenSource(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
 	client := OAuthConf.Client(ctx, token)
 
 	return client, nil
