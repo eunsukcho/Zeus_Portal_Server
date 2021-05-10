@@ -56,18 +56,15 @@ func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, boo
 	return nil, true, nil
 }
 
-func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
+func GetClient(ctx context.Context, token *oauth2.Token) (*http.Client, error) {
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
-	token, err := auth.GetApiClientTokenSource(ctx)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
 
+	fmt.Println("GetClient")
 	client := OAuthConf.Client(ctx, token)
+
 	return client, nil
 }
 
@@ -79,15 +76,13 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) (*oauth2.Toke
 			TokenURL: auth.TokenUrl,
 		},
 	}
-
 	log.Println("[DEBUG] Obtaining Tokensource for user %s", auth.AdminId)
 
 	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
 	if err != nil {
-		
+
 		return nil, err
 	}
-
 	return token, nil
 }
 
@@ -120,12 +115,12 @@ func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId str
 	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
 	fmt.Println("groupId :", groupId)
 	resp, err := client.Get(
-		auth.GroupEndpoint+groupId+"/members",
+		auth.GroupEndpoint + groupId + "/members",
 	)
 
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Client Connection Error")
-		
+
 		return nil, errConnFail
 	}
 	defer resp.Body.Close()
@@ -167,7 +162,7 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client
 	return models.ResponseUserInfo{}, errConnFail
 }
 
-func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
+func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, int, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - Request Register User Api")
 
@@ -181,19 +176,24 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 		buff,
 	)
 	fmt.Println(resp.StatusCode)
-	if err != nil || resp.StatusCode != 201 {
+
+	if err != nil {
 		fmt.Println("register error")
-		//fmt.Println(err.Error())
-		return "", errConnFail
+		return "", 0, errConnFail
 	}
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode == 201 {
+		fmt.Println(string(respBody))
+	}
+
 	fmt.Println(string(respBody))
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
-	return string(respBody), nil
+	return string(respBody), resp.StatusCode, nil
 }
 
 func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *http.Client) (string, error) {
@@ -285,6 +285,8 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 }
 
 func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, client *http.Client) ([]models.ResGroupInfo, error) {
+	//client, err := GetClient(ctx, token)
+
 	log.Printf("[DEBUG] Fetching API Client - User Groups Api (List --)")
 	var requesturl string
 	if group == "all" {

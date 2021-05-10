@@ -9,12 +9,14 @@ import (
 	"zeus/requestLayer"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/oauth2"
 )
+
 var errConnFail = errors.New("Connection Failed")
 
 type RequestHandlerInterface interface {
 	//user setting
-	errHandler(err_str string, err error)(bool, string)
+	errHandler(err_str string, err error) (bool, string)
 	UserList(c *gin.Context)
 	UserListByGroup(c *gin.Context)
 	RequestUserInfo(id string, c *gin.Context)
@@ -33,13 +35,14 @@ type RequestHandler struct {
 	requestH requestLayer.RequestLayer
 	ctx      context.Context
 	client   *http.Client
+	token    *oauth2.Token
 	authInfo *requestLayer.AuthInfo
 }
 
 func NewRequestHandler() (RequestHandlerInterface, error) {
 	var authBinding models.Authdetails
 	auth, err := requestLayer.NewAuthInfo(authBinding)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -54,9 +57,8 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	var authBinding models.AdminAPIInfo
 
 	if err := c.ShouldBindJSON(&authBinding); err != nil {
-		//fmt.Println("binding error", err.Error())
 		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status":false, "message":"Binding Error"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": false, "message": "Binding Error"})
 		return
 	}
 	var rst bool
@@ -65,26 +67,24 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	}
 	auth, _ := requestLayer.NewAuthInfo(authBinding.Admin)
 	h.authInfo = auth
-	if rst == false {
-		apiClient, err := requestLayer.GetClient(h.ctx, h.authInfo)
-		if err != nil {
-			c.Error(err)
-			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status":502, "message":"Connection refused"})
-			return
-		}
-		h.client = apiClient
+
+	if !rst || h.token == nil { // Auth 정보가 변경되었거나 Token이 null 일 때
+		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
+	}
+	var clientErr error
+	h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
+	if clientErr != nil {
 		return
 	}
-	fmt.Println("auth User : ", authBinding.User)
+
 	c.Set("User", authBinding.User)
 	c.Next()
 }
 func (h *RequestHandler) GroupClientInit(c *gin.Context) {
-	fmt.Println("GroupClientInit")
 	var authBinding models.GroupAdminAPIInfo
 
 	if err := c.ShouldBindJSON(&authBinding); err != nil {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{"status":false, "message":"Binding Error"})
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": false, "message": "Binding Error"})
 		return
 	}
 	fmt.Println("Group init : ", authBinding)
@@ -95,14 +95,12 @@ func (h *RequestHandler) GroupClientInit(c *gin.Context) {
 	auth, _ := requestLayer.NewAuthInfo(authBinding.Admin)
 	h.authInfo = auth
 
-	if rst == false {
-		apiClient, err := requestLayer.GetClient(h.ctx, h.authInfo)
-		if err != nil {
-			c.Error(err)
-			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status":502, "message":"Connection refused"})
-			return
-		}
-		h.client = apiClient
+	if !rst || h.token == nil { // Auth 정보가 변경되었거나 Token이 null 일 때
+		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
+	}
+	var clientErr error
+	h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
+	if clientErr != nil {
 		return
 	}
 	c.Set("Groups", authBinding.Groups)
@@ -125,19 +123,22 @@ func CompareInfo(inputAuth models.Authdetails, initInfo *requestLayer.AuthInfo) 
 	return true, nil
 }
 
-func (h *RequestHandler) errHandler(err_str string, err error) (bool, string){
-	fmt.Println(err_str)
-	var status bool = false;
-	var message string;
-	message = err.Error();
-	fmt.Println("Err : ", err)
-	fmt.Println("ErrConnFail : ", errConnFail)
+func (h *RequestHandler) errHandler(err_str string, err error) (bool, string) {
+	var clientErr error
+	var status bool = false
+	var message string
+	message = err.Error()
 
-    fmt.Println("Err Error : ", err.Error())
-	if (err.Error() == "Connection Failed") {
-		fmt.Println("err == errConnFail")
-		h.client, _ = requestLayer.GetClient(h.ctx, h.authInfo)
-		message ="Client Connection False";
+	auth := h.authInfo
+	fmt.Println("Err Error : ", err.Error())
+	if err.Error() == "Connection Failed" {
+
+		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
+		h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
+		if clientErr != nil {
+			return status, ""
+		}
+		message = "Client Connection False"
 	} else {
 		fmt.Println("err != errConnFail")
 	}
@@ -155,7 +156,7 @@ func (h *RequestHandler) UserList(c *gin.Context) {
 	if err := c.ShouldBindUri(&uri); err != nil {
 		fmt.Println("error bind uri")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": "Binding Error",
 		})
 		return
@@ -171,7 +172,7 @@ func (h *RequestHandler) UserListByGroup(c *gin.Context) {
 	if err := c.ShouldBindUri(&uri); err != nil {
 		fmt.Println("error bind uri")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": "Binding Error",
 		})
 		return
@@ -185,7 +186,7 @@ func (h *RequestHandler) UserListByGroup(c *gin.Context) {
 	if err != nil {
 		status, err_str := h.errHandler("RequestUserListByGroupApi error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
@@ -208,7 +209,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 		if err != nil {
 			status, err_str := h.errHandler("RequestUserListApi error 발생", err)
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"status": status,
+				"status":  status,
 				"message": err_str,
 			})
 			return
@@ -229,7 +230,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 		if err != nil {
 			status, err_str := h.errHandler("RequestUserListApi error 발생", err)
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"status": status,
+				"status":  status,
 				"message": err_str,
 			})
 			return
@@ -245,17 +246,18 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 
 	regi := c.MustGet("User").(models.RegisterUserInfo)
 	fmt.Println("Regi : ", regi)
-	rst, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.client)
+	rst, statusCode, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.client)
+
 	if err != nil {
 		status, err_str := h.errHandler("Request register error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status": http.StatusOK,
+		"status": statusCode,
 		"data":   rst,
 	})
 }
@@ -275,7 +277,7 @@ func (h *RequestHandler) DeleteUser(c *gin.Context) {
 	if err != nil {
 		status, err_str := h.errHandler("Request user delete error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
@@ -291,7 +293,7 @@ func (h *RequestHandler) UpdateUser(c *gin.Context) {
 	if err != nil {
 		status, err_str := h.errHandler("Request user update error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
@@ -306,7 +308,7 @@ func (h *RequestHandler) UpdateUserCredentials(c *gin.Context) {
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": err.Error(),
 		})
 		return
@@ -318,7 +320,7 @@ func (h *RequestHandler) UpdateUserCredentials(c *gin.Context) {
 	if err != nil {
 		status, err_str := h.errHandler("Request user update credentials error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
@@ -333,7 +335,7 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": false,
+			"status":  false,
 			"message": err.Error(),
 		})
 		return
@@ -347,7 +349,7 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 	if err != nil {
 		status, err_str := h.errHandler("Request group list error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
@@ -370,7 +372,7 @@ func (h *RequestHandler) RegisterToken(c *gin.Context) {
 	if err != nil {
 		status, err_str := h.errHandler("Request group token error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"status": status,
+			"status":  status,
 			"message": err_str,
 		})
 		return
@@ -380,4 +382,3 @@ func (h *RequestHandler) RegisterToken(c *gin.Context) {
 		"data":   rst,
 	})
 }
-

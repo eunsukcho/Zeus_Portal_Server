@@ -25,6 +25,8 @@ type HandlerInterface interface {
 	AuthHandler
 
 	DruidHandler
+
+	NamespaceHandler
 }
 
 type Handler struct {

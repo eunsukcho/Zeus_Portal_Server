@@ -13,7 +13,7 @@ type RequestLayer interface {
 	RequestUserListApi(context.Context, *http.Client) ([]models.ResponseUserInfo, error)
 	RequestUserListByGroupApi(context.Context, string, *http.Client) ([]models.ResponseUserInfo, error)
 	RequestOneUserApi(context.Context, string, *http.Client) (models.ResponseUserInfo, error)
-	RequestRegisterUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, error)
+	RequestRegisterUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, int, error)
 	DeleteUserApi(context.Context, string, *http.Client) (string, error)
 	UpdateUserApi(context.Context, models.RegisterUserInfo, *http.Client) (string, error)
 	UpdateUserCredentialsApi(context.Context, string, *http.Client) (string, error)
