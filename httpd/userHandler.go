@@ -69,6 +69,7 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	h.authInfo = auth
 
 	if !rst || h.token == nil { // Auth 정보가 변경되었거나 Token이 null 일 때
+		fmt.Println("UserClientInit : !rst || h.token")
 		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
 	}
 	var clientErr error
@@ -96,6 +97,7 @@ func (h *RequestHandler) GroupClientInit(c *gin.Context) {
 	h.authInfo = auth
 
 	if !rst || h.token == nil { // Auth 정보가 변경되었거나 Token이 null 일 때
+		fmt.Println("GroupClientInit : !rst || h.token")
 		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
 	}
 	var clientErr error
@@ -126,17 +128,15 @@ func CompareInfo(inputAuth models.Authdetails, initInfo *requestLayer.AuthInfo) 
 func (h *RequestHandler) errHandler(err_str string, err error) (bool, string) {
 	var clientErr error
 	var status bool = false
-	var message string
-	message = err.Error()
+	var message = err.Error()
 
-	auth := h.authInfo
-	fmt.Println("Err Error : ", err.Error())
 	if err.Error() == "Connection Failed" {
-
+		fmt.Println("Client Connection Error : ", err.Error())
+		auth := h.authInfo
 		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
 		h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
 		if clientErr != nil {
-			return status, ""
+			return status, clientErr.Error()
 		}
 		message = "Client Connection False"
 	} else {
