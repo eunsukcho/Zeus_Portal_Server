@@ -82,6 +82,17 @@ func metaData(anything interface{}, tableDiv string) string {
 					whereQuery.WriteString(endDt)
 					whereQuery.WriteString("'")
 				}
+				if startDt != "" && endDt == "" {
+					whereQuery.WriteString(` AND \"__time\" >= TIMESTAMP '`)
+					whereQuery.WriteString(startDt)
+					whereQuery.WriteString("'")
+				}
+				if startDt == "" && endDt != "" {
+					whereQuery.WriteString(` AND \"__time\" <= TIMESTAMP '`)
+					whereQuery.WriteString(endDt)
+					whereQuery.WriteString("'")
+				}
+
 				continue
 			}
 			if mType.Name == "Log" || mType.Name == "Process" || mType.Name == "Message" {
