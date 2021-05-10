@@ -332,6 +332,7 @@ func (h *RequestHandler) UpdateUserCredentials(c *gin.Context) {
 }
 
 func (h *RequestHandler) GroupsList(c *gin.Context) {
+	fmt.Println("GroupList")
 	var uri models.Uri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
