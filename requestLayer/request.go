@@ -56,18 +56,13 @@ func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, boo
 	return nil, true, nil
 }
 
-func GetClient(ctx context.Context, auth *AuthInfo) (*http.Client, error) {
+func GetClient(ctx context.Context, token *oauth2.Token) (*http.Client, error) {
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 
-	token, err := auth.GetApiClientTokenSource(ctx)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
+	fmt.Println("GetClient")
 	client := OAuthConf.Client(ctx, token)
 
 	return client, nil
@@ -222,7 +217,9 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *ht
 
 		return "error", errConnFail
 	}
-	respBody, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	respBody, _ := ioutil.ReadAll(resp.Body)
 	return string(respBody), nil
 }
 
@@ -284,7 +281,9 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 
 		return "error", errConnFail
 	}
-	respBody, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	respBody, _ := ioutil.ReadAll(resp.Body)
 
 	return string(respBody), nil
 }
@@ -307,7 +306,6 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, cli
 		log.Println("Client Connection Error")
 		return nil, errConnFail
 	}
-	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err == nil && resp.StatusCode == 200 {
@@ -316,6 +314,8 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, cli
 
 		return *groups, nil
 	}
+	defer resp.Body.Close()
+
 	return nil, err
 }
 

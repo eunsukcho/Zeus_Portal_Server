@@ -15,7 +15,6 @@ import (
 var errConnFail = errors.New("Connection Failed")
 
 type RequestHandlerInterface interface {
-	InitKeyClockHttpClient() (int, string)
 	//user setting
 	errHandler(err_str string, err error) (bool, string)
 	UserList(c *gin.Context)
@@ -53,17 +52,6 @@ func NewRequestHandler() (RequestHandlerInterface, error) {
 	}, nil
 }
 
-func (h *RequestHandler) InitKeyClockHttpClient() (int, string) {
-	var clientErr error
-	auth := h.authInfo
-	fmt.Println("UserClientInit : !rst || h.token")
-	h.token, _ = auth.GetApiClientTokenSource(h.ctx)
-	h.client, clientErr = requestLayer.GetClient(h.ctx, h.authInfo)
-	if clientErr != nil {
-		return http.StatusBadRequest, "Connection refused"
-	}
-	return http.StatusOK, ""
-}
 func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	fmt.Println("UserClientInit")
 	var authBinding models.AdminAPIInfo
@@ -81,16 +69,16 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	h.authInfo = auth
 	var clientErr error
 	if !rst { // Auth 정보가 변경되었거나 처음 실행 시
-		status, str := h.InitKeyClockHttpClient()
-		if status == http.StatusBadRequest {
-			c.Error(clientErr)
-			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": status, "message": str})
-			return
-		}
+		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
+	}
+	h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
+	if clientErr != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": http.StatusBadRequest, "message": "Conection Refuesd"})
 	}
 	c.Set("User", authBinding.User)
 	c.Next()
 }
+
 func (h *RequestHandler) GroupClientInit(c *gin.Context) {
 	var authBinding models.GroupAdminAPIInfo
 
@@ -105,16 +93,15 @@ func (h *RequestHandler) GroupClientInit(c *gin.Context) {
 	}
 	auth, _ := requestLayer.NewAuthInfo(authBinding.Admin)
 	h.authInfo = auth
-
 	var clientErr error
 	if !rst { // Auth 정보가 변경되었거나 처음 실행 시
-		status, str := h.InitKeyClockHttpClient()
-		if status == http.StatusBadRequest {
-			c.Error(clientErr)
-			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": status, "message": str})
-			return
-		}
+		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
 	}
+	h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
+	if clientErr != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": http.StatusBadRequest, "message": "Conection Refuesd"})
+	}
+
 	c.Set("Groups", authBinding.Groups)
 	c.Next()
 }
@@ -141,12 +128,16 @@ func (h *RequestHandler) errHandler(err_str string, err error) (bool, string) {
 	var message = err.Error()
 
 	if err.Error() == "Connection Failed" {
-		fmt.Println("Client Connection Error : ", err.Error())
-		h.client, _ = requestLayer.GetClient(h.ctx, h.authInfo)
+		fmt.Println("Err Handler Connection Fail : ", err.Error())
+
+		auth := h.authInfo
+		token, _ := auth.GetApiClientTokenSource(h.ctx)
+
+		var clientErr error
+		h.client, clientErr = requestLayer.GetClient(h.ctx, token)
 		message = "Client Connection False"
 
-		initStatus, _ := h.InitKeyClockHttpClient()
-		if initStatus != http.StatusBadRequest {
+		if clientErr != nil {
 			return status, message
 		}
 	}
