@@ -70,7 +70,7 @@ func GetClient(ctx context.Context, token *oauth2.Token) *http.Client {
 
 	fmt.Println("tokeValid : ", tokeValid)
 
-	fmt.Println("GetClient")
+	fmt.Println("GetClient Token : ", token)
 
 	client := OAuthConf.Client(ctx, token)
 
