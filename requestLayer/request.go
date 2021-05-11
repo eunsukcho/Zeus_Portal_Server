@@ -87,9 +87,14 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 	}
 	log.Println("[DEBUG] Obtaining Tokensource for user %s", auth.AdminId)
 
-	token, _ := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
+	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
 
-	//fmt.Println("GetApiClientTokenSource :", token)
+	if err != nil {
+		fmt.Println("GetApiClientTokenSource Error : ", err.Error())
+	} else {
+		fmt.Println("GetApiClientTokenSource :", token)
+	}
+
 	return token
 }
 
