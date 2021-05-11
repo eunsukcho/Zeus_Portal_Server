@@ -35,8 +35,8 @@ type RequestHandler struct {
 	requestH requestLayer.RequestLayer
 	ctx      context.Context
 	client   *http.Client
-	token    *oauth2.Token
 	authInfo *requestLayer.AuthInfo
+	token    *oauth2.Token
 }
 
 func NewRequestHandler() (RequestHandlerInterface, error) {
@@ -65,16 +65,15 @@ func (h *RequestHandler) UserClientInit(c *gin.Context) {
 	if h.authInfo != nil {
 		rst, _ = CompareInfo(authBinding.Admin, h.authInfo)
 	}
+
 	auth, _ := requestLayer.NewAuthInfo(authBinding.Admin)
-	h.authInfo = auth
-	var clientErr error
+
 	if !rst { // Auth 정보가 변경되었거나 처음 실행 시
-		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
+		h.token = auth.GetApiClientTokenSource(h.ctx)
 	}
-	h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
-	if clientErr != nil {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": http.StatusBadRequest, "message": "Conection Refuesd"})
-	}
+
+	h.authInfo = auth
+
 	c.Set("User", authBinding.User)
 	c.Next()
 }
@@ -87,20 +86,19 @@ func (h *RequestHandler) GroupClientInit(c *gin.Context) {
 		return
 	}
 	fmt.Println("Group init : ", authBinding)
+
 	var rst bool
 	if h.authInfo != nil {
 		rst, _ = CompareInfo(authBinding.Admin, h.authInfo)
 	}
+
 	auth, _ := requestLayer.NewAuthInfo(authBinding.Admin)
-	h.authInfo = auth
-	var clientErr error
+
 	if !rst { // Auth 정보가 변경되었거나 처음 실행 시
-		h.token, _ = auth.GetApiClientTokenSource(h.ctx)
+		h.token = auth.GetApiClientTokenSource(h.ctx)
 	}
-	h.client, clientErr = requestLayer.GetClient(h.ctx, h.token)
-	if clientErr != nil {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": http.StatusBadRequest, "message": "Conection Refuesd"})
-	}
+
+	h.authInfo = auth
 
 	c.Set("Groups", authBinding.Groups)
 	c.Next()
@@ -119,6 +117,7 @@ func CompareInfo(inputAuth models.Authdetails, initInfo *requestLayer.AuthInfo) 
 	case inputAuth.TokenUrl != initInfo.TokenUrl:
 		return false, nil
 	}
+
 	return true, nil
 }
 
@@ -131,15 +130,9 @@ func (h *RequestHandler) errHandler(err_str string, err error) (bool, string) {
 		fmt.Println("Err Handler Connection Fail : ", err.Error())
 
 		auth := h.authInfo
-		token, _ := auth.GetApiClientTokenSource(h.ctx)
+		h.token = auth.GetApiClientTokenSource(h.ctx)
 
-		var clientErr error
-		h.client, clientErr = requestLayer.GetClient(h.ctx, token)
 		message = "Client Connection False"
-
-		if clientErr != nil {
-			return status, message
-		}
 	}
 	return status, message
 }
@@ -181,7 +174,7 @@ func (h *RequestHandler) UserListByGroup(c *gin.Context) {
 	var userinfo []models.ResponseUserInfo
 	var err error
 
-	userinfo, err = h.requestH.RequestUserListByGroupApi(h.ctx, uri.Id, h.client)
+	userinfo, err = h.requestH.RequestUserListByGroupApi(h.ctx, uri.Id, h.token)
 	if err != nil {
 		status, err_str := h.errHandler("RequestUserListByGroupApi error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -204,7 +197,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 		var userinfo []models.ResponseUserInfo
 		var err error
 
-		userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.client)
+		userinfo, err = h.requestH.RequestUserListApi(h.ctx, h.token)
 		if err != nil {
 			status, err_str := h.errHandler("RequestUserListApi error 발생", err)
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -225,7 +218,7 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 		var userinfo models.ResponseUserInfo
 		var err error
 
-		userinfo, err = h.requestH.RequestOneUserApi(h.ctx, id, h.client)
+		userinfo, err = h.requestH.RequestOneUserApi(h.ctx, id, h.token)
 		if err != nil {
 			status, err_str := h.errHandler("RequestUserListApi error 발생", err)
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -245,7 +238,7 @@ func (h *RequestHandler) RegisterUser(c *gin.Context) {
 
 	regi := c.MustGet("User").(models.RegisterUserInfo)
 	fmt.Println("Regi : ", regi)
-	rst, statusCode, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.client)
+	rst, statusCode, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.token)
 
 	if err != nil {
 		status, err_str := h.errHandler("Request register error 발생", err)
@@ -272,7 +265,7 @@ func (h *RequestHandler) DeleteUser(c *gin.Context) {
 	}
 	fmt.Println("userID : ", uri.Id)
 
-	rst, err := h.requestH.DeleteUserApi(h.ctx, uri.Id, h.client)
+	rst, err := h.requestH.DeleteUserApi(h.ctx, uri.Id, h.token)
 	if err != nil {
 		status, err_str := h.errHandler("Request user delete error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -288,7 +281,7 @@ func (h *RequestHandler) DeleteUser(c *gin.Context) {
 }
 func (h *RequestHandler) UpdateUser(c *gin.Context) {
 	regi := c.MustGet("User").(models.RegisterUserInfo)
-	rst, err := h.requestH.UpdateUserApi(h.ctx, regi, h.client)
+	rst, err := h.requestH.UpdateUserApi(h.ctx, regi, h.token)
 	if err != nil {
 		status, err_str := h.errHandler("Request user update error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -314,7 +307,7 @@ func (h *RequestHandler) UpdateUserCredentials(c *gin.Context) {
 	}
 	fmt.Println("userID : ", uri.Id)
 
-	rst, err := h.requestH.UpdateUserCredentialsApi(h.ctx, uri.Id, h.client)
+	rst, err := h.requestH.UpdateUserCredentialsApi(h.ctx, uri.Id, h.token)
 
 	if err != nil {
 		status, err_str := h.errHandler("Request user update credentials error 발생", err)
@@ -345,7 +338,7 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 	var groups []models.ResGroupInfo
 	var err error
 
-	groups, err = h.requestH.RequestGroupListApi(h.ctx, uri.Id, h.client)
+	groups, err = h.requestH.RequestGroupListApi(h.ctx, uri.Id, h.token)
 	if err != nil {
 		status, err_str := h.errHandler("Request group list error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -368,7 +361,7 @@ func (h *RequestHandler) RegisterToken(c *gin.Context) {
 	regi := c.MustGet("Groups").(models.ReqToken)
 	fmt.Println("test : ", regi)
 
-	rst, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.client)
+	rst, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.token)
 	if err != nil {
 		status, err_str := h.errHandler("Request group token error 발생", err)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{

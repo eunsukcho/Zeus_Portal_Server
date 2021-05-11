@@ -21,6 +21,7 @@ var OAuthConf *oauth2.Config
 type AuthInfo struct {
 	*models.Authdetails
 	*KeycloakApiInfo
+	Token *oauth2.Token
 }
 
 var errConnFail = errors.New("Connection Failed")
@@ -35,7 +36,10 @@ func NewAuthInfo(auth models.Authdetails) (*AuthInfo, error) {
 			AdminId:      auth.AdminId,
 			AdminPw:      auth.AdminPw,
 			TokenUrl:     auth.TokenUrl,
-		}, SettingKeycloakInfo("ope")}, nil
+		},
+		SettingKeycloakInfo("ope"),
+		nil,
+	}, nil
 }
 
 func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, bool, error) {
@@ -56,19 +60,24 @@ func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, boo
 	return nil, true, nil
 }
 
-func GetClient(ctx context.Context, token *oauth2.Token) (*http.Client, error) {
+func GetClient(ctx context.Context, token *oauth2.Token) *http.Client {
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 
+	var tokeValid = token.Valid()
+
+	fmt.Println("tokeValid : ", tokeValid)
+
 	fmt.Println("GetClient")
+
 	client := OAuthConf.Client(ctx, token)
 
-	return client, nil
+	return client
 }
 
-func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) (*oauth2.Token, error) {
+func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token {
 	OAuthConf = &oauth2.Config{
 		ClientID:     auth.ClientId,
 		ClientSecret: auth.ClientSecret,
@@ -78,17 +87,17 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) (*oauth2.Toke
 	}
 	log.Println("[DEBUG] Obtaining Tokensource for user %s", auth.AdminId)
 
-	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
-	if err != nil {
+	token, _ := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
 
-		return nil, err
-	}
-	return token, nil
+	//fmt.Println("GetApiClientTokenSource :", token)
+	return token
 }
 
-func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Client) ([]models.ResponseUserInfo, error) {
+func (auth *AuthInfo) RequestUserListApi(ctx context.Context, token *oauth2.Token) ([]models.ResponseUserInfo, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
 	fmt.Println("userendpoint :", auth.UserEndpoint)
+
+	client := GetClient(ctx, token)
 	resp, err := client.Get(
 		auth.UserEndpoint,
 	)
@@ -111,9 +120,10 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, client *http.Clien
 
 }
 
-func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId string, client *http.Client) ([]models.ResponseUserInfo, error) {
+func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId string, token *oauth2.Token) ([]models.ResponseUserInfo, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
-	fmt.Println("groupId :", groupId)
+
+	client := GetClient(ctx, token)
 	resp, err := client.Get(
 		auth.GroupEndpoint + groupId + "/members",
 	)
@@ -137,9 +147,10 @@ func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId str
 
 }
 
-func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client *http.Client) (models.ResponseUserInfo, error) {
+func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, token *oauth2.Token) (models.ResponseUserInfo, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request One User Api")
 
+	client := GetClient(ctx, token)
 	resp, err := client.Get(
 		auth.UserEndpoint + user,
 	)
@@ -162,7 +173,7 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, client
 	return models.ResponseUserInfo{}, errConnFail
 }
 
-func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, int, error) {
+func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, token *oauth2.Token) (string, int, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - Request Register User Api")
 
@@ -170,6 +181,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)
 
+	client := GetClient(ctx, token)
 	resp, err := client.Post(
 		auth.UserEndpoint,
 		"application/json",
@@ -196,8 +208,10 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	return string(respBody), resp.StatusCode, nil
 }
 
-func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *http.Client) (string, error) {
+func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, token *oauth2.Token) (string, error) {
 	log.Printf("[DEBUG] Fetching API Client - Delete User Api")
+
+	client := GetClient(ctx, token)
 
 	req, err := http.NewRequest(
 		"DELETE",
@@ -223,7 +237,7 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, client *ht
 	return string(respBody), nil
 }
 
-func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUserInfo, client *http.Client) (string, error) {
+func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUserInfo, token *oauth2.Token) (string, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
 
@@ -231,6 +245,8 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 
 	ubytes, _ := json.Marshal(user)
 	buff := bytes.NewBuffer(ubytes)
+
+	client := GetClient(ctx, token)
 
 	req, err := http.NewRequest(
 		"PUT",
@@ -256,7 +272,8 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 	return string(respBody), nil
 }
 
-func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string, client *http.Client) (string, error) {
+func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string, token *oauth2.Token) (string, error) {
+	client := GetClient(ctx, token)
 
 	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
 
@@ -288,8 +305,8 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 	return string(respBody), nil
 }
 
-func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, client *http.Client) ([]models.ResGroupInfo, error) {
-	//client, err := GetClient(ctx, token)
+func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, token *oauth2.Token) ([]models.ResGroupInfo, error) {
+	client := GetClient(ctx, token)
 
 	log.Printf("[DEBUG] Fetching API Client - User Groups Api (List --)")
 	var requesturl string
@@ -303,6 +320,7 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, cli
 		requesturl,
 	)
 	if err != nil || resp.StatusCode != 200 {
+		fmt.Println("RequestGroupListApi err : ", err)
 		log.Println("Client Connection Error")
 		return nil, errConnFail
 	}
@@ -319,8 +337,8 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, cli
 	return nil, err
 }
 
-func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models.ReqToken, client *http.Client) (string, error) {
-
+func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models.ReqToken, token *oauth2.Token) (string, error) {
+	client := GetClient(ctx, token)
 	log.Printf("[DEBUG] Fetching API Client - Register Groups Api")
 
 	fmt.Println("GROUP : ", group)
