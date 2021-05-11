@@ -3,6 +3,7 @@ package requestLayer
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -62,7 +63,11 @@ func InputAuthInit(inputAuth models.Authdetails, auth *AuthInfo) (*AuthInfo, boo
 
 func GetClient(ctx context.Context, token *oauth2.Token) *http.Client {
 
-	httpClient := &http.Client{Timeout: 10 * time.Second}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Timeout: 10 * time.Second, Transport: tr}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 
