@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"zeus/dblayer"
 	"zeus/druid"
+	"zeus/k8s"
 	"zeus/models"
 
 	"github.com/gin-gonic/gin"
@@ -26,17 +27,19 @@ type HandlerInterface interface {
 
 	DruidHandler
 
-	NamespaceHandler
+	K8SNamespaceInterface
 }
 
 type Handler struct {
 	db    dblayer.DBLayer
 	druid druid.DruidInterface
+	k8s   *k8s.K8SInfo
 }
 
 func NewHandlerWithParams() (HandlerInterface, error) {
 	db, err := dblayer.NewDBInit()
 	druid := druid.NewClientInfo()
+	k8s := k8s.SettingK8SInfo("ope")
 
 	if err != nil {
 		return nil, err
@@ -44,6 +47,7 @@ func NewHandlerWithParams() (HandlerInterface, error) {
 	return &Handler{
 		db:    db,
 		druid: druid,
+		k8s:   k8s,
 	}, nil
 }
 

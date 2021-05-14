@@ -93,5 +93,15 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		druidApi.GET("/:table", h.GetColumnSearchInfo)
 		druidApi.POST("/val", h.GetLogValue)
 	}
+
+	k8sNamespaceApi := r.Group("/api/k8s/namespace")
+	k8sNamespaceApi.Use(h.BindingModel)
+	{
+		k8sNamespaceApi.POST("", h.CreateRequestProject)
+		k8sNamespaceApi.POST("/resourcequotas", h.CreateRequestResourceQuota)
+		k8sNamespaceApi.POST("/serviceAccount", h.CreateServiceAccount)
+		k8sNamespaceApi.POST("/roles", h.CreateRole)
+		k8sNamespaceApi.POST("/rolesBinding", h.CreateRoleBinding)
+	}
 	return r.Run(address)
 }
