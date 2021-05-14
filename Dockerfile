@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:latest
 ADD ./certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /tmp
 ADD . /tmp
