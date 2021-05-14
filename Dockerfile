@@ -1,6 +1,5 @@
-FROM golang:latest
-RUN apt install ca-certificates
-ADD ./certs/ca-certificates.crt /etc/ssl/certs/
-WORKDIR /tmp
-ADD . /tmp
+FROM ubuntu:latest
+ADD main /tmp/
+WORKDIR /tmp/main
 EXPOSE 3000
+CMD ['main']
