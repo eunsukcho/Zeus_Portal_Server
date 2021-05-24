@@ -2,8 +2,9 @@ package models
 
 type K8SRole struct {
 	K8SProjcet
-	Rules RulesArray `json:"rules"`
+	Rules []RulesArray `json:"rules"`
 }
+
 type RulesArray struct {
 	ApiGroups []string `json:"apiGroups"`
 	Resources []string `json:"resources"`

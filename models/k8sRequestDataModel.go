@@ -12,11 +12,15 @@ type K8SRequestData struct {
 	Hard       Hard                    `json:"hard"`
 	Spec       Spec                    `json:"spec"`
 	MetaData   MetaData                `json:"metadata"`
-	RulesArray RulesArray              `json:"rules"`
+	RulesArray []RulesArray            `json:"rules"`
 	Subjects   []RoleBindingBaseObject `json:"subjects"`
 	RoleRef    RoleBindingBaseObject   `json:"roleRef"`
 }
 
 func (request *K8SRequestData) SettingRequest(ref RoleBindingBaseObject) {
 	request.Subjects = append(request.Subjects, ref)
+}
+
+func (request *K8SRequestData) SettingRuleRequest(rules RulesArray) {
+	request.RulesArray = append(request.RulesArray, rules)
 }

@@ -15,6 +15,10 @@ type K8SNamespaceInterface interface {
 	CreateServiceAccount(c *gin.Context)
 	CreateRole(c *gin.Context)
 	CreateRoleBinding(c *gin.Context)
+
+	GetUserToken(c *gin.Context)
+
+	DeleteNamespace(c *gin.Context)
 }
 
 func (h *Handler) BindingModel(c *gin.Context) {
@@ -32,9 +36,6 @@ func (h *Handler) BindingModel(c *gin.Context) {
 func (h *Handler) CreateRequestProject(c *gin.Context) {
 	requestData := c.MustGet("RequestData").(models.K8SRequestData)
 
-	namespaceEndpoint := h.k8s.NamespaceEndpoint
-	fmt.Println("Namespace Endpoint : ", namespaceEndpoint)
-
 	var k8SMetaData models.MetaData
 	k8SMetaData.SettingMetaData(requestData)
 	requestData.MetaData = k8SMetaData
@@ -44,15 +45,24 @@ func (h *Handler) CreateRequestProject(c *gin.Context) {
 	requestData.Kind = "Namespace"
 	k8SProjcet.SettingK8SPj(requestData)
 
-	c.JSON(http.StatusOK, k8SProjcet)
+	rstTxt, statusCode, err := h.k8s.CreateProject(k8SProjcet)
+	fmt.Println("CreateRequestProject Error :", err)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	c.JSON(statusCode, gin.H{
+		"status": statusCode,
+		"data":   rstTxt,
+	})
 }
 
 func (h *Handler) CreateRequestResourceQuota(c *gin.Context) {
 	requestData := c.MustGet("RequestData").(models.K8SRequestData)
 	requestData.Name = requestData.Name + "-resource" // resourceQuota Name(UserId-resource)
-
-	reousceEndpoint := h.k8s.NamespaceEndpoint + "/" + requestData.Namespace + "/resourcequotas"
-	fmt.Println("Namespace_Resource_Endpoint : ", reousceEndpoint)
 
 	var k8SMetaData models.MetaData
 	k8SMetaData.SettingMetaData(requestData)
@@ -74,14 +84,22 @@ func (h *Handler) CreateRequestResourceQuota(c *gin.Context) {
 	var k8SResource models.K8SResource
 	k8SResource.SettingSpecResource(requestData, K8SProjcet)
 
-	c.JSON(http.StatusOK, k8SResource)
+	rstTxt, statusCode, err := h.k8s.CreateResource(requestData, k8SResource)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	c.JSON(statusCode, gin.H{
+		"status": statusCode,
+		"data":   rstTxt,
+	})
 }
 
 func (h *Handler) CreateServiceAccount(c *gin.Context) {
 	requestData := c.MustGet("RequestData").(models.K8SRequestData)
-
-	serviceEndpoint := h.k8s.NamespaceEndpoint + "/" + requestData.Namespace + "/serviceaccounts"
-	fmt.Println("Namespace_ServiceAccount_Endpoint : ", serviceEndpoint)
 
 	var k8SMetaData models.MetaData
 	k8SMetaData.SettingMetaData(requestData)
@@ -92,15 +110,23 @@ func (h *Handler) CreateServiceAccount(c *gin.Context) {
 	requestData.Kind = "ServiceAccount"
 	k8SProjcet.SettingK8SPj(requestData)
 
-	c.JSON(http.StatusOK, k8SProjcet)
+	rstTxt, statusCode, err := h.k8s.CreateServiceAccount(requestData, k8SProjcet)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	c.JSON(statusCode, gin.H{
+		"status": statusCode,
+		"data":   rstTxt,
+	})
 }
 
 func (h *Handler) CreateRole(c *gin.Context) {
 	requestData := c.MustGet("RequestData").(models.K8SRequestData)
 	requestData.Name = requestData.Name + "-role" // Role Name(UserId-role)
-
-	rolesEndpoint := h.k8s.NamespaceEndpoint + "/" + requestData.Namespace + "/roles"
-	fmt.Println("Namespace_Role_Endpoint : ", rolesEndpoint)
 
 	var k8SMetaData models.MetaData
 	k8SMetaData.SettingMetaData(requestData)
@@ -113,21 +139,29 @@ func (h *Handler) CreateRole(c *gin.Context) {
 
 	var rulesArray models.RulesArray
 	rulesArray.SettingValue()
-	requestData.RulesArray = rulesArray
+	requestData.SettingRuleRequest(rulesArray)
 
 	var rules models.K8SRole
 	rules.SettingK8SSetting(requestData, k8SProjcet)
 
-	c.JSON(http.StatusOK, rules)
+	rstTxt, statusCode, err := h.k8s.CreateRole(requestData, rules)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	c.JSON(statusCode, gin.H{
+		"status": statusCode,
+		"data":   rstTxt,
+	})
 }
 
 func (h *Handler) CreateRoleBinding(c *gin.Context) {
 	requestData := c.MustGet("RequestData").(models.K8SRequestData)
 	name := requestData.Name
 	requestData.Name = name + "-roleBiding" // RoleBinding Name(UserId-role)
-
-	rolesBindingEndpoint := h.k8s.NamespaceEndpoint + "/" + requestData.Namespace + "/rolebindings"
-	fmt.Println("Namespace_RoleBinding_Endpoint : ", rolesBindingEndpoint)
 
 	var k8SMetaData models.MetaData
 	k8SMetaData.SettingMetaData(requestData)
@@ -150,5 +184,71 @@ func (h *Handler) CreateRoleBinding(c *gin.Context) {
 	var roleBinding models.K8SRoleBinding
 	roleBinding.SettingRoleBinding(requestData, k8SProjcet)
 
-	c.JSON(http.StatusOK, roleBinding)
+	rstTxt, statusCode, err := h.k8s.CreateRoleBinding(requestData, roleBinding)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	c.JSON(statusCode, gin.H{
+		"status": statusCode,
+		"data":   rstTxt,
+	})
+}
+func (h *Handler) GetUserToken(c *gin.Context) {
+	requestData := c.MustGet("RequestData").(models.K8SRequestData)
+	rstTxt, statusCode, err := h.k8s.GetUserSecretName(requestData)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("User Secret Name :", rstTxt)
+	requestData.Name = rstTxt //유저 시크릿명
+
+	rstTxtToken, statusCodeToken, errToken := h.k8s.GetUserToken(requestData)
+	if errToken != nil {
+		c.AbortWithStatusJSON(statusCodeToken, gin.H{
+			"status":        statusCodeToken,
+			"error message": errToken.Error(),
+		})
+		return
+	}
+	fmt.Println("User Token Value : ", rstTxtToken)
+	c.JSON(statusCodeToken, gin.H{
+		"status": statusCodeToken,
+		"data":   rstTxtToken,
+	})
+}
+
+type UriParameter struct {
+	Namespace string `uri:"namespace"`
+}
+
+func (h *Handler) DeleteNamespace(c *gin.Context) {
+	var namespace UriParameter
+	if err := c.ShouldBindUri(&namespace); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", namespace.Namespace)
+
+	rstTxt, statusCode, err := h.k8s.DeleteNamespace(namespace.Namespace)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, gin.H{
+			"status":        statusCode,
+			"error message": err.Error(),
+		})
+		return
+	}
+	c.JSON(statusCode, gin.H{
+		"status": statusCode,
+		"data":   rstTxt,
+	})
 }

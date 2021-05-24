@@ -33,7 +33,7 @@ type HandlerInterface interface {
 type Handler struct {
 	db    dblayer.DBLayer
 	druid druid.DruidInterface
-	k8s   *k8s.K8SInfo
+	k8s   k8s.K8SInterface
 }
 
 func NewHandlerWithParams() (HandlerInterface, error) {

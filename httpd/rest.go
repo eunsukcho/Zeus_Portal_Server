@@ -102,6 +102,11 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		k8sNamespaceApi.POST("/serviceAccount", h.CreateServiceAccount)
 		k8sNamespaceApi.POST("/roles", h.CreateRole)
 		k8sNamespaceApi.POST("/rolesBinding", h.CreateRoleBinding)
+
+		k8sNamespaceApi.POST("/userToken", h.GetUserToken)
 	}
+	k8sNamespaceApiDelete := r.Group("/api/k8s/namespace")
+	k8sNamespaceApiDelete.DELETE("/deleteNamespace/:namespace", h.DeleteNamespace)
+
 	return r.Run(address)
 }
