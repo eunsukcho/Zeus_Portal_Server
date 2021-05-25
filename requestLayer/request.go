@@ -103,7 +103,7 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 	return token
 }
 
-func (auth *AuthInfo) RequestUserListApi(ctx context.Context, token *oauth2.Token) ([]models.ResponseUserInfo, error) {
+func (auth *AuthInfo) RequestUserListApi(ctx context.Context, token *oauth2.Token) ([]models.ResponseUserInfo, int, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
 	fmt.Println("userendpoint :", auth.UserEndpoint)
 
@@ -114,7 +114,7 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, token *oauth2.Toke
 
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Client Connection Error")
-		return nil, errConnFail
+		return nil, http.StatusUnauthorized, errConnFail
 	}
 	defer resp.Body.Close()
 
@@ -123,14 +123,14 @@ func (auth *AuthInfo) RequestUserListApi(ctx context.Context, token *oauth2.Toke
 		userinfo := &[]models.ResponseUserInfo{}
 		_ = json.Unmarshal([]byte(string(respBody)), userinfo)
 
-		return *userinfo, nil
+		return *userinfo, resp.StatusCode, nil
 	}
 
-	return nil, errConnFail
+	return nil, resp.StatusCode, errConnFail
 
 }
 
-func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId string, token *oauth2.Token) ([]models.ResponseUserInfo, error) {
+func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId string, token *oauth2.Token) ([]models.ResponseUserInfo, int, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request UserList Api")
 
 	client := GetClient(ctx, token)
@@ -141,7 +141,7 @@ func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId str
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Client Connection Error")
 
-		return nil, errConnFail
+		return nil, http.StatusUnauthorized, errConnFail
 	}
 	defer resp.Body.Close()
 
@@ -150,14 +150,14 @@ func (auth *AuthInfo) RequestUserListByGroupApi(ctx context.Context, groupId str
 		userinfo := &[]models.ResponseUserInfo{}
 		_ = json.Unmarshal([]byte(string(respBody)), userinfo)
 
-		return *userinfo, nil
+		return *userinfo, resp.StatusCode, nil
 	}
 
-	return nil, errConnFail
+	return nil, resp.StatusCode, errConnFail
 
 }
 
-func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, token *oauth2.Token) (models.ResponseUserInfo, error) {
+func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, token *oauth2.Token) (models.ResponseUserInfo, int, error) {
 	log.Printf("[DEBUG] Fetching API Client - Request One User Api")
 
 	client := GetClient(ctx, token)
@@ -167,7 +167,7 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, token 
 
 	if err != nil || resp.StatusCode != 200 {
 		log.Println("Client Connection Error")
-		return models.ResponseUserInfo{}, errConnFail
+		return models.ResponseUserInfo{}, http.StatusUnauthorized, errConnFail
 	}
 
 	defer resp.Body.Close()
@@ -177,10 +177,10 @@ func (auth *AuthInfo) RequestOneUserApi(ctx context.Context, user string, token 
 		userinfo := &models.ResponseUserInfo{}
 		_ = json.Unmarshal([]byte(string(respBody)), userinfo)
 
-		return *userinfo, nil
+		return *userinfo, resp.StatusCode, nil
 	}
 
-	return models.ResponseUserInfo{}, errConnFail
+	return models.ResponseUserInfo{}, resp.StatusCode, errConnFail
 }
 
 func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.RegisterUserInfo, token *oauth2.Token) (string, int, error) {
@@ -218,7 +218,7 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 	return string(respBody), resp.StatusCode, nil
 }
 
-func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, token *oauth2.Token) (string, error) {
+func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, token *oauth2.Token) (string, int, error) {
 	log.Printf("[DEBUG] Fetching API Client - Delete User Api")
 
 	client := GetClient(ctx, token)
@@ -230,7 +230,7 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, token *oau
 	)
 	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
-		return "error", err
+		return "error", 0, err
 	}
 
 	resp, err := client.Do(req)
@@ -239,15 +239,15 @@ func (auth *AuthInfo) DeleteUserApi(ctx context.Context, user string, token *oau
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "error", errConnFail
+		return "error", 0, errConnFail
 	}
 	defer resp.Body.Close()
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	return string(respBody), nil
+	return string(respBody), resp.StatusCode, nil
 }
 
-func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUserInfo, token *oauth2.Token) (string, error) {
+func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUserInfo, token *oauth2.Token) (string, int, error) {
 
 	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
 
@@ -264,7 +264,7 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 		buff,
 	)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
@@ -272,17 +272,18 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 	if err != nil || resp.StatusCode != 204 {
 		fmt.Println("register error")
 		fmt.Println(err)
+		return "error", 0, errConnFail
 	}
 	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errConnFail
+		return "", resp.StatusCode, errConnFail
 	}
-	return string(respBody), nil
+	return string(respBody), resp.StatusCode, nil
 }
 
-func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string, token *oauth2.Token) (string, error) {
+func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string, token *oauth2.Token) (string, int, error) {
 	client := GetClient(ctx, token)
 
 	log.Printf("[DEBUG] Fetching API Client - Request Update User Api")
@@ -297,7 +298,7 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 	)
 	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
-		return "error", err
+		return "error", 0, err
 	}
 
 	resp, err := client.Do(req)
@@ -306,16 +307,16 @@ func (auth *AuthInfo) UpdateUserCredentialsApi(ctx context.Context, user string,
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "error", errConnFail
+		return "error", 0, errConnFail
 	}
 	defer resp.Body.Close()
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
 
-	return string(respBody), nil
+	return string(respBody), resp.StatusCode, nil
 }
 
-func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, token *oauth2.Token) ([]models.ResGroupInfo, error) {
+func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, token *oauth2.Token) ([]models.ResGroupInfo, int, error) {
 	client := GetClient(ctx, token)
 
 	log.Printf("[DEBUG] Fetching API Client - User Groups Api (List --)")
@@ -329,10 +330,11 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, tok
 	resp, err := client.Get(
 		requesturl,
 	)
+
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Println("RequestGroupListApi err : ", err)
 		log.Println("Client Connection Error")
-		return nil, errConnFail
+		return nil, http.StatusUnauthorized, errConnFail
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -340,14 +342,14 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, tok
 		groups := &[]models.ResGroupInfo{}
 		_ = json.Unmarshal([]byte(string(respBody)), groups)
 
-		return *groups, nil
+		return *groups, resp.StatusCode, nil
 	}
 	defer resp.Body.Close()
 
-	return nil, err
+	return nil, resp.StatusCode, err
 }
 
-func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models.ReqToken, token *oauth2.Token) (string, error) {
+func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models.ReqToken, token *oauth2.Token) (string, int, error) {
 	client := GetClient(ctx, token)
 	log.Printf("[DEBUG] Fetching API Client - Register Groups Api")
 
@@ -362,7 +364,7 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 		buff,
 	)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
@@ -371,9 +373,9 @@ func (auth *AuthInfo) RequestRegisterGroupsApi(ctx context.Context, group models
 		t, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("str : " + string(t))
 
-		return "error", errConnFail
+		return "error", http.StatusUnauthorized, errConnFail
 	}
 	defer resp.Body.Close()
 
-	return "", nil
+	return "", resp.StatusCode, nil
 }
