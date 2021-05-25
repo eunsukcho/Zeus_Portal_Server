@@ -17,5 +17,10 @@
       host: "http://192.168.0.106"
       port: "31250"
       endpoint : "/druid/v2/sql"   
-       
+  k8s:
+    ope:
+      k8sNamespaceEndpoint : "http://192.168.0.105:8001/api/v1/namespaces"
+      k8sAuthEndpoint : "http://192.168.0.105:8001/apis/rbac.authorization.k8s.io/v1/namespaces"
+      k8sToken : "eyJhbGciOiJSUzI1NiIsImtpZCI6IklYN3dNYzkybmZOUzI4Zi01MnRiYVV1cTl2MF9ZbjVrclJiNTVzaUhRYm8ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLW5kZHA4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJjMDNkM2E0YS04MDg1LTRlMDItODhkMC05ZjliOThlODFhMmEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.oNkaattCKYrkW8HDKeF86FxP-998TScwYb0-ObfoJGX2dFN4p6fa1Jgac1J2ipBlcD9fkVzAt34N5H9B76o2B-a2fE9EciUiCRsCz_dh70sf5ip07WaLEXYm9HuKUfwvNcRLm06KYpSov2IF9qTTrqUb0KQwGm_ezt0Xl-uSBcwIlAL9pcs2SedRhsSNIBWTf6ZLQM_gkVt3-nUPRpB5dZJXevN6mylzwg1yDiTg1L7GgU0F2DNdIYCbaQUmcx2lpy8bGyz0kNrhWBO2T3zjzVFu6uNxCGPdgJ0ToLUWeTntqvRWFIoRuerJg8mDwgruSXvBCCYjGVmQxjMHhxPK6Q"
+      
 
