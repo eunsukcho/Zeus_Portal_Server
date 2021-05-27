@@ -66,11 +66,11 @@ func (TopMenuIcon) TableName() string {
 }
 
 type Env_setting_Tbls struct {
-	ThemeSettingVal  string `gorm:"column:theme_setting_val" binding:"required" json:"themeSettingVal"`
-	LangSettingVal   string `gorm:"column:lang_setting_val" binding:"required" json:"langSettingVal"`
-	AutoLogoutVal    bool   `gorm:"type:boolean; column:auto_logout_val" binding:"required" json:"autoLogoutVal"`
-	PortalVersion    int    `gorm:"column:portal_version" binding:"required" json:"portalVersion"`
-	UserRegisterAuth bool   `gorm:"type:boolean; column:user_register_auth" binding:"required" json:"userRegisterAuth"`
+	ThemeSettingVal  string `gorm:"column:theme_setting_val" json:"themeSettingVal"`
+	LangSettingVal   string `gorm:"column:lang_setting_val"  json:"langSettingVal"`
+	AutoLogoutVal    bool   `gorm:"column:auto_logout_val"  json:"autoLogoutVal"`
+	PortalVersion    int    `gorm:"column:portal_version" json:"portalVersion"`
+	UserRegisterAuth bool   `gorm:"column:user_register_auth" json:"userRegisterAuth"`
 }
 type Envs struct {
 	ThemeSettingVal  string `binding:"required" json:"themeSettingVal"`
@@ -116,6 +116,7 @@ func (LogType_Code) TableName() string {
 // Binding Uri
 type Uri struct {
 	Id          string `uri:"id"`
+	ReqId       uint   `uri:"reqId"`
 	TopCode     string `uri:"topCode"`
 	SubCode     string `uri:"subCode"`
 	Order       int    `uri:"order"`

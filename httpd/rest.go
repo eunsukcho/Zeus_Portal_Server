@@ -108,5 +108,15 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	k8sNamespaceApiDelete := r.Group("/api/k8s/namespace")
 	k8sNamespaceApiDelete.DELETE("/deleteNamespace/:namespace", h.DeleteNamespace)
 
+	devServerApi := r.Group("/api/devServer")
+	{
+		devServerApi.GET("", h.GetAllDevServerInfoData)
+		devServerApi.GET("/:reqId", h.GetDevServerInfoDataById)
+
+		devServerApi.POST("", h.SaveDevServerInfo)
+		devServerApi.PUT("/:reqId", h.UpdateDevServerInfo)
+		devServerApi.DELETE("/:reqId", h.DeleteDevServerInfo)
+	}
+
 	return r.Run(address)
 }

@@ -1,10 +1,13 @@
 package httpd
 
 import (
+	"bytes"
 	_ "bytes"
 	"fmt"
 	_ "html/template"
+	"io/ioutil"
 	"net/http"
+	"time"
 	"zeus/dblayer"
 	"zeus/druid"
 	"zeus/k8s"
@@ -28,6 +31,7 @@ type HandlerInterface interface {
 	DruidHandler
 
 	K8SNamespaceInterface
+	DevServerHandler
 }
 
 type Handler struct {
@@ -83,14 +87,61 @@ func (h *Handler) UpdateEnvData(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	/*
+		** add grafana sqlite db update api
+		var updateGrafanaPreference string
+		if env.ThemeSettingVal == "LIGTH" {
+			updateGrafanaPreference = `{"theme" : "ligth" }`
+		} else {
+			updateGrafanaPreference = `{"theme" : "dark" }`
+		}
+		fmt.Println(updateGrafanaPreference)
+		var reqJson = bytes.NewBuffer([]byte(updateGrafanaPreference))
+		respVal, _, err := HTTPGetGrafana("PUT", "http://106.240.106.242:32001/api/user/preferences", reqJson, rst.GrafanaToken)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		fmt.Println("RespVal : ", string(respVal))
+		fmt.Println("rst : ", rst)
+
+	*/
+
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
 		"isOK":   1,
 		"data":   rst,
 	})
+}
+
+func HTTPGetGrafana(method string, url string, reqJson *bytes.Buffer, token string) (respBody []byte, statusCode int, err error) {
+	var req *http.Request
+	req, err = http.NewRequest(method, url, reqJson)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		panic(err)
 	}
+	req.Header.Add("Content-Type", "application/json")
+	if token != "" {
+
+		req.Header.Add("Authorization", "Bearer "+token)
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return nil, http.StatusRequestTimeout, err
+	}
+
+	defer resp.Body.Close()
+
+	respBody, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, resp.StatusCode, err
+	}
+	return respBody, resp.StatusCode, nil
 }

@@ -17,6 +17,7 @@ type DBLayer interface {
 	MenuLayer
 	SmtpLayer
 	AuthLayer
+	DevServerLayer
 }
 
 type DBORM struct {

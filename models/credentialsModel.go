@@ -75,6 +75,7 @@ type userCredentilas struct {
 // Groups Struct
 type ReqToken struct {
 	Id         string          `json:"id" `
+	Name       string          `json:"name" `
 	Attributes groupAttributes `json:"attributes" `
 }
 
