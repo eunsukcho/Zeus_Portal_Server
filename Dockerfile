@@ -1,6 +1,6 @@
-FROM ubuntu:latest
+FROM golang:latest
+RUN apt install ca-certificates
 ADD ./certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /tmp
 ADD . /tmp
 EXPOSE 3000
-CMD ["/bin/bash","-c","./main"]
