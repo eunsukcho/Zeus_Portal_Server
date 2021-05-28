@@ -7,7 +7,7 @@ func (db *DBORM) SmtpInfoConnectionCheck() ([]models.SmtpInfo, error) {
 	return nil, nil
 }
 func (db *DBORM) SmtpInfoSave(smtpinfo models.SmtpInfo) (models.SmtpInfo, error) {
-	return smtpinfo, db.Model(&smtpinfo).Update(&smtpinfo).Error
+	return smtpinfo, db.Model(&smtpinfo).Updates(&smtpinfo).Error
 }
 func (db *DBORM) SmtpInfoTest() ([]models.SmtpInfo, error) {
 	return nil, nil

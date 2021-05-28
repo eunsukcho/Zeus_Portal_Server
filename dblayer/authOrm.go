@@ -45,6 +45,6 @@ func (db *DBORM) GetDevUserInfo(group string) ([]models.RegisterUserInfo, error)
 	return devInfo, nil
 }
 func (db *DBORM) AcceptUpdateUser(user string) (dev models.Dev_Info, err error) {
-
-	return dev, db.Model(&dev).Where("email = ?", user).Update(models.Dev_Info{Enabled: true}).Error
+	var updateTbl models.Dev_Info
+	return dev, db.Model(&updateTbl).Where("email = ?", user).Updates(models.Dev_Info{Enabled: true}).Error
 }

@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -28,11 +26,9 @@ type TopMenuInfo struct {
 	Top_Menu_Target_Url string `gorm:"column:top_menu_target_url" json:"top_menu_target_url"`
 	Top_Menu_Order      string `gorm:"column:top_menu_order" json:"top_menu_order"`
 	Icon_Code           string `gorm:"column:icon_code" json:"icon_code"`
-	ID                  uint   `gorm:"primarykey"`
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
-	DeletedAt           gorm.DeletedAt `gorm:"-"`
-	New_Window          string         `gorm:"column:new_window" json:"new_window"`
+	gorm.Model
+	DeletedAt  gorm.DeletedAt `gorm:"-"`
+	New_Window string         `gorm:"column:new_window" json:"new_window"`
 }
 
 func (TopMenuInfo) TableName() string {
@@ -66,11 +62,13 @@ func (TopMenuIcon) TableName() string {
 }
 
 type Env_setting_Tbls struct {
+	ID               uint   `gorm:"primarykey"`
 	ThemeSettingVal  string `gorm:"column:theme_setting_val" json:"themeSettingVal"`
 	LangSettingVal   string `gorm:"column:lang_setting_val"  json:"langSettingVal"`
 	AutoLogoutVal    bool   `gorm:"column:auto_logout_val"  json:"autoLogoutVal"`
 	PortalVersion    int    `gorm:"column:portal_version" json:"portalVersion"`
 	UserRegisterAuth bool   `gorm:"column:user_register_auth" json:"userRegisterAuth"`
+	GrafanaToken     string `gorm:"column:grafana_token" json:"grafanaToken"`
 }
 type Envs struct {
 	ThemeSettingVal  string `binding:"required" json:"themeSettingVal"`
@@ -78,6 +76,7 @@ type Envs struct {
 	AutoLogoutVal    bool   `binding:"required" json:"autoLogoutVal"`
 	PortalVersion    int    `binding:"required" json:"zoneVersionportalVersion"`
 	UserRegisterAuth bool   `binding:"required" json:"userRegisterAuth"`
+	GrafanaToken     string `gorm:"column:grafana_token" json:"grafanaToken"`
 }
 
 func (Env_setting_Tbls) TableName() string {

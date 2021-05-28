@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"zeus/models"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
+	_ "github.com/jinzhu/gorm"
 )
 
 type DBLayer interface {
@@ -31,7 +34,7 @@ func NewDBInit() (*DBORM, error) {
 		dbConfig.db_host, dbConfig.db_port, dbConfig.db_username, dbConfig.db_name, dbConfig.db_password)
 	fmt.Println("conname \n", postgres_conn_name)
 
-	db, err := gorm.Open("postgres", postgres_conn_name)
+	db, err := gorm.Open(postgres.Open(postgres_conn_name), &gorm.Config{})
 
 	return &DBORM{
 		DB: db,

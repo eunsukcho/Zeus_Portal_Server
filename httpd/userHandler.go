@@ -184,9 +184,6 @@ func (h *RequestHandler) UserListByGroup(c *gin.Context) {
 		})
 		return
 	}
-	for _, value := range userinfo {
-		fmt.Println("userList :", value)
-	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
 		"data":   userinfo,
@@ -207,9 +204,6 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 				"message": err_str,
 			})
 			return
-		}
-		for _, value := range userinfo {
-			fmt.Println("userList :", value)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": http.StatusOK,
@@ -240,7 +234,6 @@ func (h *RequestHandler) RequestUserInfo(id string, c *gin.Context) {
 func (h *RequestHandler) RegisterUser(c *gin.Context) {
 
 	regi := c.MustGet("User").(models.RegisterUserInfo)
-	fmt.Println("Regi : ", regi)
 	rst, statusCode, err := h.requestH.RequestRegisterUserApi(h.ctx, regi, h.token)
 
 	if err != nil {
@@ -352,9 +345,6 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 		})
 		return
 	}
-	for _, value := range groups {
-		fmt.Println(value)
-	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
 		"data":   groups,
@@ -364,7 +354,6 @@ func (h *RequestHandler) GroupsList(c *gin.Context) {
 func (h *RequestHandler) RegisterToken(c *gin.Context) {
 
 	regi := c.MustGet("Groups").(models.ReqToken)
-	fmt.Println("test : ", regi)
 
 	rst, statusCode, err := h.requestH.RequestRegisterGroupsApi(h.ctx, regi, h.token)
 	if err != nil {

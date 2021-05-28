@@ -17,7 +17,7 @@ func (db *DBORM) SaveDevServerInfo(dev models.DevServerModel) (models.DevServerM
 
 func (db *DBORM) UpdateDevServerInfo(dev models.DevServerModel, id uint) (models.DevServerModel, error) {
 	var updateTbl models.DevServerModel
-	return dev, db.Model(&updateTbl).Where("id=?", id).Update(dev).Error
+	return dev, db.Model(&updateTbl).Where("id=?", id).Updates(models.DevServerModel{InternalIP: dev.InternalIP, ExternalIP: dev.ExternalIP, Hostname: dev.Hostname}).Error
 }
 
 func (db *DBORM) DeleteDevServerInfo(id uint) error {

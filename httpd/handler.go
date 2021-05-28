@@ -22,6 +22,7 @@ type HandlerInterface interface {
 
 	//env setting
 	GetEnvData(c *gin.Context)
+	GetEnvDataShare() ([]models.Env_setting_Tbls, error)
 	UpdateEnvData(c *gin.Context)
 
 	MenuHandler
@@ -48,6 +49,7 @@ func NewHandlerWithParams() (HandlerInterface, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &Handler{
 		db:    db,
 		druid: druid,
@@ -65,8 +67,7 @@ func (h *Handler) DBConnectionCheck(c *gin.Context) {
 
 // init zeus env
 func (h *Handler) GetEnvData(c *gin.Context) {
-	env_setting_tbls, err := h.db.GetAllEnvData()
-
+	env_setting_tbls, err := h.GetEnvDataShare()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -75,38 +76,47 @@ func (h *Handler) GetEnvData(c *gin.Context) {
 	c.JSON(http.StatusOK, env_setting_tbls)
 }
 
+func (h *Handler) GetEnvDataShare() ([]models.Env_setting_Tbls, error) {
+	env_setting_tbls, err := h.db.GetAllEnvData()
+	if err != nil {
+		return nil, err
+	}
+	return env_setting_tbls, nil
+}
+
 func (h *Handler) UpdateEnvData(c *gin.Context) {
 	var env models.Env_setting_Tbls
 	err := c.ShouldBindJSON(&env)
 	fmt.Println("env : ", env)
 
-	rst, err := h.db.UpdateEnvData(env)
-	fmt.Println("rst : ", rst)
-
+	env_setting_tbls, err := h.GetEnvDataShare()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	/*
-		** add grafana sqlite db update api
-		var updateGrafanaPreference string
-		if env.ThemeSettingVal == "LIGTH" {
-			updateGrafanaPreference = `{"theme" : "ligth" }`
-		} else {
-			updateGrafanaPreference = `{"theme" : "dark" }`
-		}
-		fmt.Println(updateGrafanaPreference)
-		var reqJson = bytes.NewBuffer([]byte(updateGrafanaPreference))
-		respVal, _, err := HTTPGetGrafana("PUT", "http://106.240.106.242:32001/api/user/preferences", reqJson, rst.GrafanaToken)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		fmt.Println("RespVal : ", string(respVal))
-		fmt.Println("rst : ", rst)
+	rst, err := h.db.UpdateEnvData(env)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	*/
+	var updateGrafanaPreference string
+	if env.ThemeSettingVal == "LIGHT" {
+		updateGrafanaPreference = `{"theme" : "light" }`
+	} else {
+		updateGrafanaPreference = `{"theme" : "dark" }`
+	}
+
+	var reqJson = bytes.NewBuffer([]byte(updateGrafanaPreference))
+	respVal, _, err := HTTPGetGrafana("PUT", "http://106.240.106.242:32001/api/org/preferences", reqJson, env.GrafanaToken)
+	if err != nil {
+		_, err := h.db.UpdateEnvData(env_setting_tbls[0])
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println("RespVal : ", string(respVal))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
