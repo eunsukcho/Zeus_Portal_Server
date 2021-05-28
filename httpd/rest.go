@@ -37,6 +37,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	menuApi := r.Group("/api/menu")
 	menuApi.Use(h.DBConnectionCheck)
 	{
+		menuApi.GET("/mainView", h.GetMainView)
 		menuApi.POST("/topMenuInfoByName/:topCodeName", h.GetTopMenuInfoByName)
 		menuApi.GET("/topmenu", h.GetTopMenuData)
 		menuApi.GET("/submenu", h.SubTopMenuData)
@@ -47,6 +48,7 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		menuApi.POST("/submenusave", h.SaveSubMenu)
 		menuApi.POST("/topmenudelete", h.DeleteTopMenu)
 		menuApi.POST("/submenudelete", h.DeleteSubMenu)
+		menuApi.POST("/ckMainUrl", h.CkDuplicateIsMain)
 		menuApi.POST("/topmenusaveUrl", h.SaveUrlLink)
 		menuApi.POST("/submenusaveUrl", h.SaveUrlSubLink)
 		menuApi.POST("/topmenudeleteUrl", h.DeleteTopMenuUrl)

@@ -21,14 +21,15 @@ func (SmtpInfo) TableName() string {
 }
 
 type TopMenuInfo struct {
-	Top_Menu_Code       string `gorm:"column:top_menu_code" json:"top_menu_code" binding:"required"`
-	Top_Menu_Name       string `gorm:"column:top_menu_name" json:"top_menu_name"`
-	Top_Menu_Target_Url string `gorm:"column:top_menu_target_url" json:"top_menu_target_url"`
-	Top_Menu_Order      string `gorm:"column:top_menu_order" json:"top_menu_order"`
-	Icon_Code           string `gorm:"column:icon_code" json:"icon_code"`
 	gorm.Model
-	DeletedAt  gorm.DeletedAt `gorm:"-"`
-	New_Window string         `gorm:"column:new_window" json:"new_window"`
+	DeletedAt           gorm.DeletedAt `gorm:"-"`
+	Top_Menu_Code       string         `gorm:"column:top_menu_code" json:"top_menu_code" binding:"required"`
+	Top_Menu_Name       string         `gorm:"column:top_menu_name" json:"top_menu_name"`
+	Top_Menu_Target_Url string         `gorm:"column:top_menu_target_url" json:"top_menu_target_url"`
+	Top_Menu_Order      string         `gorm:"column:top_menu_order" json:"top_menu_order"`
+	Icon_Code           string         `gorm:"column:icon_code" json:"icon_code"`
+	New_Window          string         `gorm:"column:new_window" json:"new_window"`
+	Is_Main             *bool          `gorm:"column:is_main" json:"is_main"`
 }
 
 func (TopMenuInfo) TableName() string {

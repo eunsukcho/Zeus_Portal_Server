@@ -6,6 +6,7 @@ type MenuLayer interface {
 
 	// menu setting
 	GetTopMenuInfoByName(string) (models.TopMenuInfo, error)
+	GetMainView() (models.TopMenuInfo, error)
 	GetAllTopMenu() ([]models.TopMenuInfo, error)
 	GetAllSubMenu() ([]models.SubMenuInfo, error)
 	CkDuplicateTopMenu(string) (int64, error)
@@ -18,6 +19,7 @@ type MenuLayer interface {
 	DeleteSubMenuByTopCodeUrl(string) (models.SubMenuInfo, error)
 	DeleteSubMenuInfo(models.SubMenuInfo) (models.SubMenuInfo, error)
 	GetAllIcon() ([]models.TopMenuIcon, error)
+	CkDuplicateIsMain(models.TopMenuInfo) (rst int64, err error)
 	SaveUrlLink(models.TopMenuInfo) (models.TopMenuInfo, error)
 	SaveUrlSubLink(models.SubMenuInfo) (models.SubMenuInfo, error)
 	DeleteTopMenuUrl(models.TopMenuInfo) (models.TopMenuInfo, error)

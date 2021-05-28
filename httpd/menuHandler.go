@@ -12,6 +12,7 @@ type MenuHandler interface {
 
 	//menu setting
 	GetTopMenuInfoByName(c *gin.Context)
+	GetMainView(c *gin.Context)
 	GetTopMenuData(c *gin.Context)
 	SubTopMenuData(c *gin.Context)
 	CkDuplicateTopMenu(c *gin.Context)
@@ -21,6 +22,7 @@ type MenuHandler interface {
 	DeleteTopMenu(c *gin.Context)
 	DeleteSubMenu(c *gin.Context)
 	GetIcon(c *gin.Context)
+	CkDuplicateIsMain(c *gin.Context)
 	SaveUrlLink(c *gin.Context)
 	SaveUrlSubLink(c *gin.Context)
 	DeleteTopMenuUrl(c *gin.Context)
@@ -56,6 +58,18 @@ func (h *Handler) GetTopMenuInfoByName(c *gin.Context) {
 		"data":   top_menu,
 	})
 }
+
+func (h *Handler) GetMainView(c *gin.Context) {
+	main_view, err := h.db.GetMainView()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, main_view)
+}
+
 func (h *Handler) GetTopMenuData(c *gin.Context) {
 
 	top_menu, err := h.db.GetAllTopMenu()
@@ -238,6 +252,32 @@ func (h *Handler) GetIcon(c *gin.Context) {
 	c.JSON(http.StatusOK, icon)
 }
 
+func (h *Handler) CkDuplicateIsMain(c *gin.Context) {
+	var topMenu models.TopMenuInfo
+	err := c.ShouldBindJSON(&topMenu)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"isOK":   0,
+			"error":  err,
+		})
+		fmt.Println(err)
+		return
+	}
+	rst, err := h.db.CkDuplicateIsMain(topMenu)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"isOK":   1,
+		"body":   rst,
+	})
+}
+
 func (h *Handler) SaveUrlLink(c *gin.Context) {
 
 	var topMenu models.TopMenuInfo
@@ -252,6 +292,7 @@ func (h *Handler) SaveUrlLink(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("topMenu : ", topMenu)
 	rst, err := h.db.SaveUrlLink(topMenu)
 	fmt.Println(rst)
 	if err != nil {

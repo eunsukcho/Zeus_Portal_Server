@@ -1,10 +1,16 @@
 package dblayer
 
-import "zeus/models"
+import (
+	"fmt"
+	"zeus/models"
+)
 
 // menu setting
 func (db *DBORM) GetTopMenuInfoByName(topCodeName string) (top models.TopMenuInfo, err error) {
 	return top, db.Where("top_menu_name = ? ", topCodeName).Find(&top).Error
+}
+func (db *DBORM) GetMainView() (top models.TopMenuInfo, err error) {
+	return top, db.Where("is_main = ? ", true).Find(&top).Error
 }
 func (db *DBORM) GetAllTopMenu() (top []models.TopMenuInfo, err error) {
 	return top, db.Order("top_menu_order asc").Find(&top).Error
@@ -52,8 +58,16 @@ func (db *DBORM) DeleteSubMenuInfo(sub models.SubMenuInfo) (models.SubMenuInfo, 
 func (db *DBORM) GetAllIcon() (icon []models.TopMenuIcon, err error) {
 	return icon, db.Find(&icon).Error
 }
+func (db *DBORM) CkDuplicateIsMain(top models.TopMenuInfo) (int64, error) {
+	var findTopModel models.TopMenuInfo
+	var cnt int64
+	return cnt, db.Model(&findTopModel).Where("top_menu_code != ? and is_main = ?", top.Top_Menu_Code, true).Count(&cnt).Error
+}
 func (db *DBORM) SaveUrlLink(top models.TopMenuInfo) (models.TopMenuInfo, error) {
-	return top, db.Model(&top).Where("top_menu_code = ?", top.Top_Menu_Code).Updates(models.TopMenuInfo{Top_Menu_Target_Url: top.Top_Menu_Target_Url, New_Window: top.New_Window}).Error
+	fmt.Println("top.Is_Main : ", top.Top_Menu_Code)
+	fmt.Println("top.Is_Main : ", top.Is_Main)
+	isMain := top.Is_Main
+	return top, db.Model(&top).Where("top_menu_code = ?", top.Top_Menu_Code).Updates(models.TopMenuInfo{Is_Main: isMain, Top_Menu_Target_Url: top.Top_Menu_Target_Url, New_Window: top.New_Window}).Error
 }
 func (db *DBORM) SaveUrlSubLink(sub models.SubMenuInfo) (models.SubMenuInfo, error) {
 	return sub, db.Model(&sub).Where("sub_menu_code = ?", sub.Sub_Menu_Code).Updates(models.SubMenuInfo{Sub_Menu_Target_Url: sub.Sub_Menu_Target_Url, New_Window: sub.New_Window}).Error
