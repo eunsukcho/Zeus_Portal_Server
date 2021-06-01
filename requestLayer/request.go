@@ -267,10 +267,10 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 
+	fmt.Println(resp.StatusCode)
 	if err != nil || resp.StatusCode != 204 {
 		fmt.Println("register error")
-		fmt.Println(err)
-		return "error", 0, errConnFail
+		return "error", resp.StatusCode, errConnFail
 	}
 	defer resp.Body.Close()
 
@@ -324,7 +324,7 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, tok
 	} else {
 		requesturl = auth.GroupEndpoint + "?search=" + group
 	}
-	fmt.Println("requesturl : ", requesturl)
+	fmt.Println("RequestGroupListApi Requesturl : ", requesturl)
 	resp, err := client.Get(
 		requesturl,
 	)

@@ -32,19 +32,33 @@ func (db *DBORM) GetDevUserInfo(group string) ([]models.RegisterUserInfo, error)
 		panic(err)
 	}
 
+	fmt.Println("GetDevUserInfo : ", tmp)
 	for _, info := range tmp {
 		var registerInfo = models.RegisterUserInfo{}
 		err := json.Unmarshal([]byte(info.Dev_info), &registerInfo)
 		if err != nil {
 			fmt.Println(err)
 		}
+		registerInfo.Dev_User_Id = info.Dev_User_Id
 		devInfo = append(devInfo, registerInfo)
 	}
 
 	fmt.Println("devInfo : ", devInfo)
 	return devInfo, nil
 }
-func (db *DBORM) AcceptUpdateUser(user string) (dev models.Dev_Info, err error) {
+func (db *DBORM) AcceptUpdateUser(user uint) (dev models.Dev_Info, err error) {
+	fmt.Println("AcceptUpdateUser : ", user)
 	var updateTbl models.Dev_Info
-	return dev, db.Model(&updateTbl).Where("email = ?", user).Updates(models.Dev_Info{Enabled: true}).Error
+	return dev, db.Model(&updateTbl).Where("dev_user_id = ?", user).Updates(models.Dev_Info{Enabled: true}).Error
+}
+
+func (db *DBORM) DeleteUser(user string) error {
+	var deleteTbl models.Dev_Info
+	return db.Model(&deleteTbl).Where("email = ?", user).Unscoped().Delete(&deleteTbl).Error
+}
+
+func (db *DBORM) CkDuplicateTmpDev(user string) (rst int64, err error) {
+	var target models.Dev_Info
+	var cnt int64
+	return cnt, db.Model(&target).Where("email = ? and enabled=?", user, false).Count(&cnt).Error
 }

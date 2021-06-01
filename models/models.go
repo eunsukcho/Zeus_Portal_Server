@@ -85,10 +85,11 @@ func (Env_setting_Tbls) TableName() string {
 }
 
 type Dev_Info struct {
-	Dev_info  string `gorm:"column:dev_info" json:"devInfo"`
-	Enabled   bool   `gorm:"column:enabled" json:"enabled"`
-	GroupName string `gorm:"column:groupname" json:"groupName"`
-	Email     string `gorm:"column:email" json:"email"`
+	Dev_User_Id uint   `gorm:"primarykey"`
+	Dev_info    string `gorm:"column:dev_info" json:"devInfo"`
+	Enabled     bool   `gorm:"column:enabled" json:"enabled"`
+	GroupName   string `gorm:"column:groupname" json:"groupName"`
+	Email       string `gorm:"column:email" json:"email"`
 }
 
 func (Dev_Info) TableName() string {

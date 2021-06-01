@@ -13,6 +13,9 @@ func (Authdetails) TableName() string {
 }
 
 // Binding struct
+type ReqOption struct {
+	Body AdminAPIInfo `json:"body"`
+}
 type AdminAPIInfo struct {
 	User  RegisterUserInfo `json:"user"`
 	Admin Authdetails      `binding:"required" json:"admin"`
@@ -29,7 +32,8 @@ type UserListData struct {
 }
 
 type RegisterUserInfo struct {
-	ID string `json:"id"`
+	ID          string `json:"id"`
+	Dev_User_Id uint   `json:"dev_user_id,omitempty"`
 	UserInfo
 	Groups     []string          `json:"groups" gorm:"column:groups"`
 	Attributes userAttribute     `json:"attributes"`

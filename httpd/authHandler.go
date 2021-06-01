@@ -19,8 +19,11 @@ type AuthHandler interface {
 	//Invitation User
 	InvitationUser(c *gin.Context)
 	CreateDevUser(c *gin.Context)
+
 	GetDevUser(c *gin.Context)
 	AcceptUser(c *gin.Context)
+	DeleteTmpUser(c *gin.Context)
+	CkDuplicateTmpDev(c *gin.Context)
 }
 
 func (h *Handler) AuthInfoData(c *gin.Context) {
@@ -95,7 +98,7 @@ func (h *Handler) GetDevUser(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("userID : ", uri.Id)
+	fmt.Println("Group Name : ", uri.Id)
 
 	devuser_info_tbls, err := h.db.GetDevUserInfo(uri.Id)
 
@@ -114,8 +117,8 @@ func (h *Handler) AcceptUser(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("userID : ", uri.Id)
-	accept_dev, err := h.db.AcceptUpdateUser(uri.Id)
+	fmt.Println("userID : ", uri.ReqId)
+	accept_dev, err := h.db.AcceptUpdateUser(uri.ReqId)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -125,6 +128,48 @@ func (h *Handler) AcceptUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  http.StatusOK,
 		"message": "success",
+	})
+}
+
+func (h *Handler) DeleteTmpUser(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.Id)
+	err := h.db.DeleteUser(uri.Id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "success",
+	})
+}
+
+func (h *Handler) CkDuplicateTmpDev(c *gin.Context) {
+	var uri models.Uri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	fmt.Println("userID : ", uri.Id)
+	accept_dev, err := h.db.CkDuplicateTmpDev(uri.Id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"body":   accept_dev,
 	})
 }
 
