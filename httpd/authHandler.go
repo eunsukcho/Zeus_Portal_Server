@@ -209,14 +209,14 @@ func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo 
 		return err
 	}
 
-	userRegisterLink := "http://192.168.0.102:4201/user/invitation/" + accessAuth + "/" + invitationAddress
+	userRegisterLink := "http://106.240.106.242:4203/user/invitation/" + accessAuth + "/" + invitationAddress
 
 	fmt.Println("SMTP Info : ", smtpinfo)
 	m := gomail.NewMessage()
 	m.SetHeader("From", smtpinfo[0].AdminAddress)
 	m.SetAddressHeader("To", invitationAddress, invitationAddress)
 	m.SetHeader("Subject", "개발자 등록 요청")
-	m.SetBody("text/html", fmt.Sprintf("아래의 링크를 복사해서 붙여넣으세요. %s", userRegisterLink))
+	m.SetBody("text/html", fmt.Sprintf("\n아래의 링크를 복사해서 붙여넣으세요. %s", userRegisterLink))
 
 	if err := gomail.Send(s, m); err != nil {
 		return fmt.Errorf(
