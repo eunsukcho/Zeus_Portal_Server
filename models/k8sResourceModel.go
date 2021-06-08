@@ -22,6 +22,6 @@ func (spec *Spec) SettingResourceSpec(request K8SRequestData) {
 	spec.Hard = request.Hard
 }
 func (hardSpec *Hard) SettingSpecHard(request K8SRequestData) {
-	hardSpec.Cpu = request.Cpu
-	hardSpec.Memory = request.Memory
+	hardSpec.Cpu = request.Cpu + "m"
+	hardSpec.Memory = request.Memory + "Gi"
 }
