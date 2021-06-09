@@ -197,7 +197,6 @@ func (auth *AuthInfo) RequestRegisterUserApi(ctx context.Context, user models.Re
 		"application/json",
 		buff,
 	)
-	fmt.Println(resp.StatusCode)
 
 	if err != nil {
 		fmt.Println("register error")
