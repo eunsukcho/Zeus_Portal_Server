@@ -95,7 +95,9 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 	token, err := OAuthConf.PasswordCredentialsToken(ctx, auth.AdminId, auth.AdminPw)
 
 	if err != nil {
-		return nil
+		fmt.Println("GetApiClientTokenSource Error : ", err.Error())
+	} else {
+		fmt.Println("GetApiClientTokenSource :", token)
 	}
 
 	return token
@@ -329,6 +331,7 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, tok
 		requesturl,
 	)
 
+	fmt.Println("resp.StatusCode : ", resp.StatusCode)
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Println("RequestGroupListApi err : ", err)
 		log.Println("Client Connection Error")
