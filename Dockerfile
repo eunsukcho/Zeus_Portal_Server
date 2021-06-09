@@ -1,5 +1,5 @@
 FROM ubuntu
-RUN apt-get install -y ca-certificates
+RUN apt install -y ca-certificates
 ADD ./certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /tmp
 ADD . /tmp
