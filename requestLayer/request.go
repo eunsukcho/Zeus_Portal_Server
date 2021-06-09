@@ -268,7 +268,6 @@ func (auth *AuthInfo) UpdateUserApi(ctx context.Context, user models.RegisterUse
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 
-	fmt.Println(resp.StatusCode)
 	if err != nil || resp.StatusCode != 204 {
 		fmt.Println("register error")
 		return "error", resp.StatusCode, errConnFail
