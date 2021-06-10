@@ -10,7 +10,7 @@ import (
 
 type DruidInterface interface {
 	GetColumnValue(string, string, string, chan string, chan []map[string]string) ([]map[string]string, error)
-	GetLogValue(models.LogSearchObj, string, string) (interface{}, error)
+	GetLogValue(models.LogSearchObj, string, string) ([]map[string]string, error)
 }
 
 type ClientInfo struct {

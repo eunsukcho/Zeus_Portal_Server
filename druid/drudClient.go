@@ -25,7 +25,6 @@ func (urlInfo *ClientInfo) GetColumnValue(column string, table string, tableDiv 
 	query.WriteString(`\"`)
 
 	reqTxt := `{"query" : "` + query.String() + `"}`
-
 	var sqlJson = bytes.NewBuffer([]byte(reqTxt))
 
 	respBody, err := HTTPDruid(url, sqlJson)
@@ -120,7 +119,7 @@ func metaData(anything interface{}, tableDiv string) string {
 	return whereQuery.String()
 }
 
-func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, tableDiv string) (rst interface{}, error error) {
+func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, tableDiv string) (rst []map[string]string, error error) {
 	url := urlInfo.Host + ":" + urlInfo.Port + urlInfo.Endpoint
 
 	whereQuery := metaData(&where, tableDiv)
@@ -132,28 +131,34 @@ func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, 
 		str = `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace\", \"pod_name\", \"loglevel\", \"log\" AS logMessage `
 	}
 	if tableDiv == "syslog" {
-		str = `SELECT \"__time\" AS collectDt, \"host\", \"loglevel\", \"message\" AS logMessage , \"process\"`
+		str = `SELECT \"__time\" AS collectDt, \"host\", \"loglevel\", \"message\" AS logMessage , \"process\" `
 	}
 
 	query.WriteString(str)
-	query.WriteString(`FROM \"`)
+	query.WriteString(` FROM \"`)
 	query.WriteString(table)
 	query.WriteString(`\" `)
 	query.WriteString(whereQuery)
 
 	reqTxt := `{"query" : "` + query.String() + `"}`
-	fmt.Println("Request JSON : ", reqTxt)
+	fmt.Println(reqTxt)
 	var sqlJson = bytes.NewBuffer([]byte(reqTxt))
 
 	respBody, err := HTTPDruid(url, sqlJson)
-	var m interface{}
+
 	if err == nil {
-		error = json.Unmarshal(respBody, &m)
+		error = json.Unmarshal(respBody, &rst)
 		if error != nil {
-			fmt.Println(error)
+			fmt.Println("Error")
+			switch e := err.(type) {
+			case *json.SyntaxError:
+				fmt.Println("json syntax error: %s at offset %d ", e, e.Offset)
+			default:
+				fmt.Printf("json default: %s", err)
+			}
 			return nil, error
 		}
-		return m, nil
+		return rst, nil
 	}
 	return nil, nil
 }
