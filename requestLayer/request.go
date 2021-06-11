@@ -329,7 +329,6 @@ func (auth *AuthInfo) RequestGroupListApi(ctx context.Context, group string, tok
 		requesturl,
 	)
 
-	fmt.Println("resp.StatusCode : ", resp.StatusCode)
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Println("RequestGroupListApi err : ", err)
 		log.Println("Client Connection Error")
