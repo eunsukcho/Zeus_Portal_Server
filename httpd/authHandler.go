@@ -209,7 +209,7 @@ func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo 
 		return err
 	}
 
-	userRegisterLink := "http://106.240.106.242:4203/user/invitation/" + accessAuth + "/" + invitationAddress
+	userRegisterLink := "http://112.217.226.91:4203/user/invitation/" + accessAuth + "/" + invitationAddress
 
 	fmt.Println("SMTP Info : ", smtpinfo)
 	m := gomail.NewMessage()

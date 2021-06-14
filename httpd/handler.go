@@ -109,7 +109,7 @@ func (h *Handler) UpdateEnvData(c *gin.Context) {
 	}
 
 	var reqJson = bytes.NewBuffer([]byte(updateGrafanaPreference))
-	respVal, _, err := HTTPGetGrafana("PUT", "http://106.240.106.242:32001/api/org/preferences", reqJson, env.GrafanaToken)
+	respVal, _, err := HTTPGetGrafana("PUT", "http://112.217.226.91:32001/api/org/preferences", reqJson, env.GrafanaToken)
 	if err != nil {
 		_, err := h.db.UpdateEnvData(env_setting_tbls[0])
 
