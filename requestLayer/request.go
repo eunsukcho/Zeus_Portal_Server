@@ -97,7 +97,7 @@ func (auth *AuthInfo) GetApiClientTokenSource(ctx context.Context) *oauth2.Token
 	if err != nil {
 		fmt.Println("GetApiClientTokenSource Error : ", err.Error())
 	} else {
-		fmt.Println("GetApiClientTokenSource :", token)
+		//fmt.Println("GetApiClientTokenSource :", token)
 	}
 
 	return token

@@ -81,7 +81,7 @@ type Envs struct {
 }
 
 func (Env_setting_Tbls) TableName() string {
-	return "env_setting_tbls"
+	return "env_setting_tbl"
 }
 
 type Dev_Info struct {
@@ -93,7 +93,7 @@ type Dev_Info struct {
 }
 
 func (Dev_Info) TableName() string {
-	return "devuser_tmp_tbls"
+	return "devuser_tmp_tbl"
 }
 
 type Res_Dev_Info struct {

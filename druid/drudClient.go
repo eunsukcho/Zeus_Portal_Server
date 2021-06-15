@@ -119,6 +119,16 @@ func metaData(anything interface{}, tableDiv string) string {
 	return whereQuery.String()
 }
 
+type ContainerLog struct {
+	CollectDt      time.Time `json:"collectDt"`
+	ContainerNname string    `json:"container_name"`
+	Hostname       string    `json:"hostname"`
+	Namespace      string    `json:"namespace"`
+	PodName        string    `json:"pod_name"`
+	LogLevel       []string  `json:"loglevel"`
+	LogMessage     string    `json:"logMessage"`
+}
+
 func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, tableDiv string) (rst []map[string]string, error error) {
 	url := urlInfo.Host + ":" + urlInfo.Port + urlInfo.Endpoint
 
@@ -146,15 +156,22 @@ func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, 
 
 	respBody, err := HTTPDruid(url, sqlJson)
 
+	var containerLog ContainerLog
 	if err == nil {
-		error = json.Unmarshal(respBody, &rst)
+		if tableDiv == "container" {
+			error = json.Unmarshal(respBody, &containerLog)
+		}
+		if tableDiv == "syslog" {
+			error = json.Unmarshal(respBody, &rst)
+		}
+
 		if error != nil {
 			fmt.Println("Error")
 			switch e := err.(type) {
 			case *json.SyntaxError:
 				fmt.Println("json syntax error: %s at offset %d ", e, e.Offset)
 			default:
-				fmt.Printf("json default: %s", err)
+				fmt.Printf("json default: %s", error)
 			}
 			return nil, error
 		}

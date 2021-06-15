@@ -9,7 +9,7 @@ type Authdetails struct {
 }
 
 func (Authdetails) TableName() string {
-	return "admin_auth_tbls"
+	return "admin_auth_tbl"
 }
 
 // Binding struct
