@@ -9,14 +9,13 @@
     ope:
       userEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/users/"
       groupEndpoint: "https://docker.jointree.co.kr:8443/auth/admin/realms/parthenon/groups/"
-    dev:
-      userEndpoint: "http://192.168.0.118:8080/auth/admin/realms/parthenon/users/"
-      groupEndpoint: "http://192.168.0.118:8080/auth/admin/realms/parthenon/groups/"
+
   druid:
     ope:
       host: "http://192.168.0.106"
       port: "31250"
       endpoint : "/druid/v2/sql"   
+      
   k8s:
     ope:
       k8sNamespaceEndpoint : "http://192.168.0.105:8001/api/v1/namespaces"

@@ -120,13 +120,13 @@ func metaData(anything interface{}, tableDiv string) string {
 }
 
 type ContainerLog struct {
-	CollectDt      time.Time `json:"collectDt"`
-	ContainerNname string    `json:"container_name"`
-	Hostname       string    `json:"hostname"`
-	Namespace      string    `json:"namespace"`
-	PodName        string    `json:"pod_name"`
-	LogLevel       []string  `json:"loglevel"`
-	LogMessage     string    `json:"logMessage"`
+	CollectDt      time.Time   `json:"collectDt"`
+	ContainerNname string      `json:"container_name"`
+	Hostname       string      `json:"hostname"`
+	Namespace      string      `json:"namespace"`
+	PodName        string      `json:"pod_name"`
+	LogLevel       string      `json:"loglevel"`
+	LogMessage     interface{} `json:"logMessage"`
 }
 
 func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, tableDiv string) (rst []map[string]string, error error) {
@@ -138,7 +138,7 @@ func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, 
 	var query bytes.Buffer
 	var str string
 	if tableDiv == "container" {
-		str = `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace\", \"pod_name\", \"loglevel\", \"log\" AS logMessage `
+		str = `SELECT \"__time\" AS collectDt, \"container_name\", \"hostname\", \"namespace\", \"pod_name\", \"loglevel\", REPLACE(\"log\", '\n', '') AS logMessage `
 	}
 	if tableDiv == "syslog" {
 		str = `SELECT \"__time\" AS collectDt, \"host\", \"loglevel\", \"message\" AS logMessage , \"process\" `
@@ -150,28 +150,23 @@ func (urlInfo *ClientInfo) GetLogValue(where models.LogSearchObj, table string, 
 	query.WriteString(`\" `)
 	query.WriteString(whereQuery)
 
+	query.WriteString(" LIMIT 20000")
 	reqTxt := `{"query" : "` + query.String() + `"}`
 	fmt.Println(reqTxt)
 	var sqlJson = bytes.NewBuffer([]byte(reqTxt))
 
 	respBody, err := HTTPDruid(url, sqlJson)
 
-	var containerLog ContainerLog
+	//var containerLog []ContainerLog
 	if err == nil {
-		if tableDiv == "container" {
-			error = json.Unmarshal(respBody, &containerLog)
-		}
-		if tableDiv == "syslog" {
-			error = json.Unmarshal(respBody, &rst)
-		}
-
+		error = json.Unmarshal(respBody, &rst)
 		if error != nil {
 			fmt.Println("Error")
 			switch e := err.(type) {
 			case *json.SyntaxError:
 				fmt.Println("json syntax error: %s at offset %d ", e, e.Offset)
 			default:
-				fmt.Printf("json default: %s", error)
+				fmt.Println("json default: %s", error)
 			}
 			return nil, error
 		}
