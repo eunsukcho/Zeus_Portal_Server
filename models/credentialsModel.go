@@ -60,14 +60,16 @@ type UserInfo struct {
 }
 
 type userAttribute struct {
-	DepartmentNm []string `json:"departmentNm" gorm:"column:theme_setting_val"`
-	Position     []string `json:"position" gorm:"column:theme_setting_val"`
-	PhoneNumber  []string `json:"phoneNumber" gorm:"column:theme_setting_val"`
+	DepartmentNm []string `json:"departmentNm"`
+	Position     []string `json:"position"`
+	PhoneNumber  []string `json:"phoneNumber"`
+	Dev_User_Id  []uint   `json:"dev_user_id"`
 }
 type resUserAttributes struct {
 	DepartmentNm []string `json:"departmentNm" binding:"required"`
 	Position     []string `json:"position" binding:"required"`
 	PhoneNumber  []string `json:"phoneNumber" binding:"required"`
+	Dev_User_Id  []string `json:"dev_user_id,omitempty"`
 }
 
 type userCredentilas struct {
