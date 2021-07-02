@@ -10,6 +10,6 @@ type AuthLayer interface {
 	SaveDevUserInfo(models.Dev_Info) (models.Dev_Info, error)
 	GetDevUserInfo(string) ([]models.RegisterUserInfo, error)
 	AcceptUpdateUser(uint) (models.Dev_Info, error)
-	DeleteUser(string) error
+	DeleteUser(string, uint) error
 	CkDuplicateTmpDev(string) (int64, error)
 }

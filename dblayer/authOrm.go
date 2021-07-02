@@ -52,9 +52,9 @@ func (db *DBORM) AcceptUpdateUser(user uint) (dev models.Dev_Info, err error) {
 	return dev, db.Model(&updateTbl).Where("dev_user_id = ?", user).Updates(models.Dev_Info{Enabled: true}).Error
 }
 
-func (db *DBORM) DeleteUser(user string) error {
+func (db *DBORM) DeleteUser(user string, id uint) error {
 	var deleteTbl models.Dev_Info
-	return db.Model(&deleteTbl).Where("email = ?", user).Unscoped().Delete(&deleteTbl).Error
+	return db.Model(&deleteTbl).Where("email = ? and dev_user_id=?", user, id).Unscoped().Delete(&deleteTbl).Error
 }
 
 func (db *DBORM) CkDuplicateTmpDev(user string) (rst int64, err error) {

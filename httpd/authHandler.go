@@ -140,7 +140,7 @@ func (h *Handler) DeleteTmpUser(c *gin.Context) {
 		return
 	}
 	fmt.Println("userID : ", uri.Id)
-	err := h.db.DeleteUser(uri.Id)
+	err := h.db.DeleteUser(uri.Id, uri.ReqId)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

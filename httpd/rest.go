@@ -76,11 +76,11 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 	devApi := r.Group("/api/developer")
 	devApi.Use(h.DBConnectionCheck)
 	{
-		devApi.GET("/cnt/:id", h.CkDuplicateTmpDev)      /* 개발자 등록 시 중복 등록 체크 */
-		devApi.POST("/users/:id", h.GetDevUser)          /* param - group name*/
-		devApi.POST("/user", h.CreateDevUser)            /* param - user json, group name, enable, email(duplicate check) */
-		devApi.POST("/commit/user/:reqId", h.AcceptUser) /* param - 임시 등록 ROW ID, devuser_tmp_tbls update */
-		devApi.DELETE("/user/:id", h.DeleteTmpUser)      /* param - 임시 등록 ROW ID, devuser_tmp_tbls delete */
+		devApi.GET("/cnt/:id", h.CkDuplicateTmpDev)           /* 개발자 등록 시 중복 등록 체크 */
+		devApi.POST("/users/:id", h.GetDevUser)               /* param - group name*/
+		devApi.POST("/user", h.CreateDevUser)                 /* param - user json, group name, enable, email(duplicate check) */
+		devApi.POST("/commit/user/:reqId", h.AcceptUser)      /* param - 임시 등록 ROW ID, devuser_tmp_tbls update */
+		devApi.DELETE("/user/:id/id/:reqId", h.DeleteTmpUser) /* param - 임시 등록 ROW ID, devuser_tmp_tbls delete */
 	}
 
 	/*
