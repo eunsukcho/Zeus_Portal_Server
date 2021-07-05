@@ -1,7 +1,9 @@
 package httpd
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -200,28 +202,43 @@ func (h *Handler) InvitationUser(c *gin.Context) {
 	})
 }
 
+type sendInterface struct {
+	UserRegisterLink string
+}
+
 func sendInvitataionEmail(accessAuth string, invitationAddress string, smtpinfo []models.SmtpInfo) error {
-	port, _ := strconv.Atoi(smtpinfo[0].Port)
-	d := gomail.NewDialer(smtpinfo[0].SmtpAddress, port, smtpinfo[0].AdminAddress, smtpinfo[0].Password)
-	s, err := d.Dial()
-	if err != nil {
-		log.Println(err.Error(), smtpinfo)
-		return err
+	t := template.New("index.html")
+
+	var parseErr error
+	t, parseErr = t.ParseFiles("./index.html")
+	if parseErr != nil {
+		log.Println(parseErr)
 	}
 
-	userRegisterLink := "http://112.217.226.91:4207/user/invitation?accessAuth=" + accessAuth + "&email=" + invitationAddress
+	//http://112.217.226.91:4207/user/user/invitation/application_dev/genius7654@naver.com
+	userRegisterLink := "http://112.217.226.91:4207/user/user/invitation/" + accessAuth + "/" + invitationAddress
+	i := sendInterface{UserRegisterLink: userRegisterLink}
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, i); err != nil {
+		log.Println(err)
+	}
 
 	fmt.Println("SMTP Info : ", smtpinfo)
+	result := tpl.String()
 	m := gomail.NewMessage()
 	m.SetHeader("From", smtpinfo[0].AdminAddress)
-	m.SetAddressHeader("To", invitationAddress, invitationAddress)
+	m.SetHeader("To", invitationAddress)
 	m.SetHeader("Subject", "개발자 등록 요청")
-	m.SetBody("text/html", fmt.Sprintf("\n아래의 링크를 복사해서 붙여넣으세요. %s", userRegisterLink))
+	m.SetBody("text/html", result)
+	//m.Attach("./index.html")
 
-	if err := gomail.Send(s, m); err != nil {
-		return fmt.Errorf(
-			"Could not send email to %q: %v", invitationAddress, err)
+	port, _ := strconv.Atoi(smtpinfo[0].Port)
+	d := gomail.NewDialer(smtpinfo[0].SmtpAddress, port, smtpinfo[0].AdminAddress, smtpinfo[0].Password)
+	// Send the email to Bob, Cora and Dan.
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
 	}
-	m.Reset()
+
 	return nil
 }

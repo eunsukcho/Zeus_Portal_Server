@@ -1,0 +1,113 @@
+<html>
+    <head>
+        <style>
+            body{
+                width: 1000px;
+                padding: 0;
+                margin: 0;
+                font-family: 'Lato', 'NS', 'Nanum Gothic', 'Malgun Gothic', '돋움', 'Ubuntu', dotum, sans-serif;
+                font-size: 14px;
+                line-height: 1.42857143;
+            }
+            header img{
+                margin: 20px;
+            }
+            #bar{
+                background-color: #fc7452;
+                width: 100%;
+                height: 10px;
+            }
+            #content{
+                width: 100%;
+                height: 50%;
+            }
+            footer {
+                background-color: ddd;
+                float:left;
+                width:100%;
+                overflow:hidden;
+                position:relative;
+                padding: 50px; 
+                display:inline-block;
+                box-sizing: border-box;
+                    }
+            #footer {
+                float:left;
+                width:100%;
+                background-color: ddd;
+                position: relative;
+                right: 70%;
+            }
+            #ft_left {
+                float:left;
+                width:26%; /* -4% */
+                position:relative;
+                left: 72%; /* +2% */
+
+            }
+            #ft_right {
+                float:left;
+                width:64%; /* -4% */
+                position:relative;
+                left: 76%; /* +4% */
+            }
+            #logo2{
+                display : block ;
+                margin : 0 auto ;
+                width: 100%;
+                margin-top: 10%;
+
+            }
+            #ft_right p.adr {
+                font-size: 14px;
+                line-height: 24px;
+                word-break: keep-all;
+            }
+            #ft_right p.copyright {
+                margin-top: 0;
+                padding-top: 0;
+                margin-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>    
+        <header>
+            <div id="bar"></div>
+            <img src="http://192.168.0.102:3000/mail/image/headerLogo.png" alt="logo" id="headerLogo"/>
+        </header>
+    
+        <div id="content">
+            아래의 URL로 이동하여 파르테논 회원가입을 진행해주세요. <br><br>
+
+            관리자 승인 후 개발자 권한으로 접속 가능합니다. <br><br>
+
+            개발자는 개발에 필요한 개발 공간 요청 및 Application을 직접 설치할 권한을 얻게 됩니다. <br><br>
+
+            <strong>회원 가입 Link : </strong> <p>{{.UserRegisterLink}}</p>
+        </div>
+    
+        <footer>      
+            <div id="footer">
+                <div id="ft_left">
+					<img src="http://192.168.0.102:3000/mail/image/footerLogo.png" alt="logo" id="footerLogo" />
+						
+                </div>
+                <div id="ft_right">
+                    <p class="adr cb">
+                        <span>㈜ 조인트리   /  사업자등록번호 : 408 - 81 - 43838   /   대표 : 김흥중<br></span>
+                        본사 : 광주광역시 광산구 상무대로 287, 3층 (소촌동) [62421]<br>
+                        Tel : 1670-6031 Fax : 062-230-2508<br>
+                        서울사무소 : 서울특별시 강남구 선릉로 704, 6층 (청담벤처빌딩) [06069] <br>
+                        Tel : 02-558-0823 Fax : 02-558-0824<br>
+                        세종사무소 : 세종특별자치시 나성로 33-6, 세종에이스타워 701호<br>
+                        <!--
+                        Tel: 044-417-6561 Fax : 044-417-6562<br>
+                        전남사무소 : 전남 나주시 배멧2길 25 스페이스코웍빌딩 3층, 301호<br>
+                        -->
+                    </p>
+                    <p class="copyright">Copyright ⓒ JOINTREE Corp. All right reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>

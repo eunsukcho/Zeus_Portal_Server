@@ -175,5 +175,8 @@ func RunAPIWithHandler(address string, h HandlerInterface, rh RequestHandlerInte
 		devServerApi.DELETE("/:reqId", h.DeleteDevServerInfo)
 	}
 
+	r.StaticFile("/mail/image/headerLogo.png", "./images/headerLogo.png")
+	r.StaticFile("/mail/image/footerLogo.png", "./images/footerLogo.png")
+
 	return r.Run(address)
 }
