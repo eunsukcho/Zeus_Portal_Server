@@ -60,5 +60,5 @@ func (db *DBORM) DeleteUser(user string, id uint) error {
 func (db *DBORM) CkDuplicateTmpDev(user string) (rst int64, err error) {
 	var target models.Dev_Info
 	var cnt int64
-	return cnt, db.Model(&target).Where("email = ? and enabled=?", user, false).Count(&cnt).Error
+	return cnt, db.Model(&target).Where("email = ?", user).Count(&cnt).Error
 }
